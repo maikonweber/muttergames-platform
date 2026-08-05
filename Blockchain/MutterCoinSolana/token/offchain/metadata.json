@@ -1,0 +1,28 @@
+{
+  "name": "MutterCoin",
+  "symbol": "MUTTER",
+  "description": "MutterCoin ($MUTTER) — medium of exchange, fee, staking and governance token of the MutterCorp GameFi ecosystem. Sandbox mint.",
+  "image": "./logo.png",
+  "external_url": "https://muttercorp.io",
+  "attributes": [
+    { "trait_type": "standard", "value": "SPL Token-2022" },
+    { "trait_type": "decimals", "value": "9" },
+    { "trait_type": "max_supply", "value": "10000000000" },
+    { "trait_type": "environment", "value": "sandbox" }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "./logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "fungible",
+    "creators": [
+      {
+        "name": "MutterCorp",
+        "share": 100
+      }
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function AccountLayout({children}:{children:React.ReactNode}){return <><section className="page-hero"><div className="container"><div className="eyebrow">Portal do jogador</div><h1>Seu núcleo MutterGames.</h1></div></section><div className="container account-shell"><nav className="side-nav" aria-label="Conta"><Link href="/account">Visão geral</Link><Link href="/account/wallets">Wallets</Link><Link href="/account">Inventário</Link></nav><div className="account-main">{children}</div></div></>}

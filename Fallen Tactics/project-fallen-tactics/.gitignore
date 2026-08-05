@@ -1,0 +1,12 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+/android/
+
+# Packaged / exported builds (committed via gitignore at monorepo root too)
+*.zip
+*.pck
+*.exe
+*.console.exe
+export_presets.cfg
+

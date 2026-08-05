@@ -1,0 +1,135 @@
+openapi: 3.1.0
+info:
+  title: MutterGames Platform API
+  version: 1.0.0-draft
+servers:
+  - url: https://api.muttergames.example/v1
+    description: Placeholder; definir domínio por ambiente
+security:
+  - bearerAuth: []
+paths:
+  /launcher/catalog:
+    get:
+      operationId: getLauncherCatalog
+      security: []
+      parameters:
+        - in: query
+          name: platform
+          required: true
+          schema: { enum: [windows] }
+      responses:
+        '200':
+          description: Releases verificadas para o portal e o launcher desktop
+  /me:
+    get:
+      operationId: getCurrentPlayer
+      responses:
+        '200':
+          description: Perfil do jogador
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Player' }
+  /me/wallet-links/challenge:
+    post:
+      operationId: createWalletChallenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chain, address]
+              properties:
+                chain: { const: solana }
+                address: { type: string }
+      responses:
+        '201': { description: Challenge curto, único e expirável }
+  /me/wallet-links/verify:
+    post:
+      operationId: verifyWalletChallenge
+      responses:
+        '204': { description: Wallet vinculada }
+        '409': { description: Nonce usado ou vínculo conflitante }
+  /inventory:
+    get:
+      operationId: listInventory
+      parameters:
+        - in: query
+          name: game_id
+          schema: { type: string }
+      responses:
+        '200':
+          description: Inventário normalizado
+  /game-events:
+    post:
+      operationId: ingestGameEvent
+      security: [{ serviceAuth: [] }]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GameEvent' }
+      responses:
+        '202': { description: Evento aceito para processamento }
+        '409': { description: Chave repetida com payload diferente }
+  /reward-grants/{grant_id}/claim-intent:
+    post:
+      operationId: createClaimIntent
+      parameters:
+        - in: path
+          name: grant_id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201': { description: Transação/voucher para assinatura }
+        '422': { description: Grant expirado, bloqueado ou já usado }
+  /market/orders:
+    post:
+      operationId: createMarketOrderIntent
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201': { description: Intent com termos e transação simulada }
+  /market/orders/{order_id}/buy-intent:
+    post:
+      operationId: createBuyIntent
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema: { type: string }
+      responses:
+        '201': { description: Intent de compra com quote expirável }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    serviceAuth: { type: mutualTLS }
+  schemas:
+    Player:
+      type: object
+      required: [id, status, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        status: { enum: [active, restricted, closed] }
+        created_at: { type: string, format: date-time }
+    GameEvent:
+      type: object
+      additionalProperties: false
+      required: [event_id, game_id, player_id, type, occurred_at, build_version, payload]
+      properties:
+        event_id: { type: string, format: uuid }
+        game_id: { enum: [fallen_tactics, beat_up] }
+        player_id: { type: string, format: uuid }
+        type: { type: string }
+        occurred_at: { type: string, format: date-time }
+        build_version: { type: string }
+        payload: { type: object }
+        payload_hash: { type: string }

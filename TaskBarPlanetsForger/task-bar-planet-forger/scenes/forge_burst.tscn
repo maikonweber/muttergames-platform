@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/generated/vfx-forge-burst-01-chromakey.png" id="1_texture"]
+[ext_resource type="Shader" path="res://shaders/chroma_key.gdshader" id="2_shader"]
+[ext_resource type="Script" path="res://scripts/vfx_burst.gd" id="3_script"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_forge"]
+shader = ExtResource("2_shader")
+shader_parameter/key_color = Color(1, 0, 1, 1)
+shader_parameter/threshold = 0.12
+shader_parameter/edge_softness = 0.03
+
+[node name="ForgeBurst" type="Sprite2D"]
+texture = ExtResource("1_texture")
+material = SubResource("ShaderMaterial_forge")
+texture_filter = 1
+visible = false
+script = ExtResource("3_script")

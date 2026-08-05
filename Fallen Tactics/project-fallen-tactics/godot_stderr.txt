@@ -1,0 +1,128 @@
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:9)
+SCRIPT ERROR: Parse Error: Could not find type "TacticalGrid" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:13)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:14)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:16)
+SCRIPT ERROR: Parse Error: Could not find type "CardDef" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:18)
+SCRIPT ERROR: Parse Error: Could not find type "TacticalGrid" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:25)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:101)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:140)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:219)
+SCRIPT ERROR: Parse Error: Could not find type "CardDef" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:271)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:307)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:307)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:338)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "hero" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:72)
+SCRIPT ERROR: Parse Error: Identifier "BattleUnit" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:73)
+SCRIPT ERROR: Parse Error: Identifier "BattleUnit" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:102)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "u" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:102)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:155)
+SCRIPT ERROR: Parse Error: Identifier "AIController" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:210)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "logs" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:210)
+SCRIPT ERROR: Parse Error: Identifier "CardLibrary" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:254)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "card" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:254)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:258)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:264)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:264)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "origin" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:273)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:275)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "max_r" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:276)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:285)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "d" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:289)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:303)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:303)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "card" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:310)
+SCRIPT ERROR: Parse Error: Identifier "EffectResolver" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:314)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "result" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:314)
+SCRIPT ERROR: Parse Error: Identifier "TacticalGrid" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:380)
+SCRIPT ERROR: Parse Error: Identifier "TacticalGrid" not declared in the current scope.
+   at: GDScript::reload (res://scripts/combat/combat_manager.gd:381)
+ERROR: Failed to load script "res://scripts/combat/combat_manager.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+SCRIPT ERROR: Parse Error: Could not find type "CombatManager" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:4)
+SCRIPT ERROR: Parse Error: Could not find type "CardDef" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:73)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:105)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "hero" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:35)
+SCRIPT ERROR: Parse Error: Identifier "CombatManager" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:42)
+SCRIPT ERROR: Parse Error: Identifier "CardLibrary" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:46)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "def" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:46)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "idx" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:51)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:55)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:57)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:59)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:61)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:63)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:75)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:77)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:79)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:81)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:83)
+SCRIPT ERROR: Parse Error: Identifier "CardDef" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:85)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:93)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:97)
+SCRIPT ERROR: Parse Error: Could not find type "BattleUnit" in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:97)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "pool" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:137)
+SCRIPT ERROR: Parse Error: Identifier "CardLibrary" not declared in the current scope.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:146)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "def" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/ui/combat_ui.gd:146)
+ERROR: Failed to load script "res://scripts/ui/combat_ui.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)

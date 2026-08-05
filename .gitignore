@@ -1,0 +1,47 @@
+# Dependencies and build output
+node_modules/
+.next/
+dist/
+coverage/
+target/
+*.tsbuildinfo
+
+# Local configuration and runtime data
+.env
+.env.local
+.env.*.local
+!.env.example
+data/
+
+# Tool and language caches
+.godot/
+.import/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Godot export / packaged builds (keep source only)
+*.zip
+*.pck
+*.exe
+*.console.exe
+*.dmg
+*.app/
+export_presets.cfg
+*.translation
+
+# Logs and editor/OS files
+*.log
+godot_stdout.txt
+godot_stderr.txt
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.tmp
+*.bak
+*~
+Revisar/
+
+# Nested repo backups (preserved when flattening into monorepo)
+.git-nested-backup/

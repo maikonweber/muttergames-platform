@@ -1,0 +1,119 @@
+name: muttergames
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-muttergames}
+      POSTGRES_USER: ${POSTGRES_USER:-muttergames}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-muttergames} -d ${POSTGRES_DB:-muttergames}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [backend]
+    restart: unless-stopped
+
+  api:
+    build: ./apps/api
+    environment:
+      NODE_ENV: development
+      API_PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-muttergames}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-muttergames}
+      TYPEORM_SYNCHRONIZE: "true"
+      WEB_ORIGIN: http://localhost:3000
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      SOLANA_FEATURE_MODE: ${SOLANA_FEATURE_MODE:-tester}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports: ["3001:3001"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/v1/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [backend, observability]
+    labels:
+      logging: alloy
+      service: muttergames-api
+    restart: unless-stopped
+
+  fallen-game-server:
+    build:
+      context: .
+      dockerfile: apps/fallen-game-server/Dockerfile
+    environment:
+      FALLEN_GS_HOST: 0.0.0.0
+      FALLEN_GS_HTTP_PORT: 4010
+      FALLEN_GS_UDP_PORT: 9001
+      FALLEN_GS_WS_PATH: /v1/session
+      FALLEN_GS_REQUIRE_AUTH: ${FALLEN_GS_REQUIRE_AUTH:-false}
+      JWT_SECRET: ${JWT_SECRET:-muttergames-dev-jwt-secret-change-me}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+    ports:
+      - "4010:4010"
+      - "9001:9001/udp"
+    networks: [backend]
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--web.enable-lifecycle"]
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports: ["9090:9090"]
+    networks: [observability]
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.7.3
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./infra/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    ports: ["3100:3100"]
+    networks: [observability]
+    restart: unless-stopped
+
+  alloy:
+    image: grafana/alloy:v1.18.0
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    volumes:
+      - ./infra/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports: ["12345:12345"]
+    networks: [observability]
+    depends_on: [loki]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports: ["3002:3000"]
+    networks: [observability]
+    depends_on: [prometheus, loki]
+    restart: unless-stopped
+
+networks:
+  backend:
+  observability:
+
+volumes:
+  postgres-data:
+  prometheus-data:
+  loki-data:
+  grafana-data:
+  alloy-data:

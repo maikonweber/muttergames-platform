@@ -1,0 +1,301 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.85, 0.93, 1, 1)
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.055, 0.11, 1)
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "✦ TASKBAR PLANETS FORGER"
+
+[node name="Compact" type="Button" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Modo compacto"
+
+[node name="Pause" type="Button" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pausar"
+
+[node name="Save" type="Button" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Salvar"
+
+[node name="Settings" type="Button" parent="Margin/Content/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Configurações"
+
+[node name="Resources" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="TutorialBox" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="Tutorial" type="Label" parent="Margin/Content/TutorialBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.95, 0.78, 0.38, 1)
+
+[node name="DismissTutorial" type="Button" parent="Margin/Content/TutorialBox"]
+layout_mode = 2
+text = "Ocultar tutorial"
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="CreateAsteroid" type="Button" parent="Margin/Content/Actions"]
+layout_mode = 2
+text = "Criar asteroide (15 Materia)"
+
+[node name="CollectWater" type="Button" parent="Margin/Content/Actions"]
+layout_mode = 2
+text = "Capturar água (8 Energia)"
+
+[node name="Research" type="Button" parent="Margin/Content/Actions"]
+layout_mode = 2
+text = "Pesquisar (8 Biomassa)"
+
+[node name="Asteroids" type="Label" parent="Margin/Content/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="Prestige" type="Button" parent="Margin/Content/Actions"]
+layout_mode = 2
+text = "Supernova / Prestigio"
+
+[node name="Separator" type="HSeparator" parent="Margin/Content"]
+layout_mode = 2
+
+[node name="Subtitle" type="Label" parent="Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Sistema solar"
+
+[node name="Orbits" type="VBoxContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EventPanel" type="PanelContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="EventContent" type="VBoxContainer" parent="Margin/Content/EventPanel"]
+layout_mode = 2
+
+[node name="EventText" type="Label" parent="Margin/Content/EventPanel/EventContent"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="Choices" type="HBoxContainer" parent="Margin/Content/EventPanel/EventContent"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SettingsPanel" type="PanelContainer" parent="Margin/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="SettingsContent" type="VBoxContainer" parent="Margin/Content/SettingsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SettingsTitle" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Configurações"
+
+[node name="Notifications" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Notificações internas"
+
+[node name="AlwaysOnTop" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Sempre no topo"
+
+[node name="CloseMinimizes" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Fechar minimiza a janela"
+
+[node name="LargeText" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Texto ampliado"
+
+[node name="RateLabel" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+text = "Velocidade da simulação"
+
+[node name="UpdateRate" type="HSlider" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.25
+max_value = 2.0
+step = 0.25
+
+[node name="OpacityLabel" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+text = "Opacidade da interface"
+
+[node name="Opacity" type="HSlider" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.45
+max_value = 1.0
+step = 0.05
+
+[node name="DesktopSeparator" type="HSeparator" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+
+[node name="DesktopTitle" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Janela desktop e bandeja"
+
+[node name="TrayEnabled" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Minimizar para a bandeja do Windows ao fechar"
+
+[node name="ClickThrough" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clique através (experimental)"
+
+[node name="MonitorRow" type="HBoxContainer" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+
+[node name="MonitorLabel" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent/MonitorRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(140, 0)
+text = "Monitor"
+
+[node name="Monitor" type="OptionButton" parent="Margin/Content/SettingsPanel/SettingsContent/MonitorRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AnchorRow" type="HBoxContainer" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+
+[node name="AnchorLabel" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent/AnchorRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(140, 0)
+text = "Ancoragem na tela"
+
+[node name="Anchor" type="OptionButton" parent="Margin/Content/SettingsPanel/SettingsContent/AnchorRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AudioSeparator" type="HSeparator" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+
+[node name="AudioTitle" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Áudio e notificações nativas"
+
+[node name="SfxEnabled" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Efeitos sonoros"
+
+[node name="VolumeLabel" type="Label" parent="Margin/Content/SettingsPanel/SettingsContent"]
+layout_mode = 2
+text = "Volume"
+
+[node name="Volume" type="HSlider" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+
+[node name="NativeNotifications" type="CheckButton" parent="Margin/Content/SettingsPanel/SettingsContent"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Notificações nativas do Windows (experimental)"
+
+[node name="Status" type="Label" parent="Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.9, 0.78, 1)
+text = "Forje seu primeiro sistema."
+
+[connection signal="pressed" from="Margin/Content/Header/Compact" to="." method="_on_compact_pressed"]
+[connection signal="pressed" from="Margin/Content/Header/Pause" to="." method="_on_pause_pressed"]
+[connection signal="pressed" from="Margin/Content/Header/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Margin/Content/Header/Settings" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="Margin/Content/Actions/CreateAsteroid" to="." method="_on_create_asteroid_pressed"]
+[connection signal="pressed" from="Margin/Content/Actions/CollectWater" to="." method="_on_collect_water_pressed"]
+[connection signal="pressed" from="Margin/Content/Actions/Research" to="." method="_on_research_pressed"]
+[connection signal="pressed" from="Margin/Content/Actions/Prestige" to="." method="_on_prestige_pressed"]
+[connection signal="pressed" from="Margin/Content/TutorialBox/DismissTutorial" to="." method="_on_dismiss_tutorial_pressed"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/Notifications" to="." method="_on_notifications_toggled"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/AlwaysOnTop" to="." method="_on_always_on_top_toggled"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/CloseMinimizes" to="." method="_on_close_minimizes_toggled"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/LargeText" to="." method="_on_large_text_toggled"]
+[connection signal="value_changed" from="Margin/Content/SettingsPanel/SettingsContent/UpdateRate" to="." method="_on_update_rate_changed"]
+[connection signal="value_changed" from="Margin/Content/SettingsPanel/SettingsContent/Opacity" to="." method="_on_opacity_changed"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/TrayEnabled" to="." method="_on_tray_enabled_toggled"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/ClickThrough" to="." method="_on_click_through_toggled"]
+[connection signal="item_selected" from="Margin/Content/SettingsPanel/SettingsContent/MonitorRow/Monitor" to="." method="_on_monitor_selected"]
+[connection signal="item_selected" from="Margin/Content/SettingsPanel/SettingsContent/AnchorRow/Anchor" to="." method="_on_anchor_selected"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/SfxEnabled" to="." method="_on_sfx_enabled_toggled"]
+[connection signal="value_changed" from="Margin/Content/SettingsPanel/SettingsContent/Volume" to="." method="_on_volume_changed"]
+[connection signal="toggled" from="Margin/Content/SettingsPanel/SettingsContent/NativeNotifications" to="." method="_on_native_notifications_toggled"]
