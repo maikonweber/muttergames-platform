@@ -11,4 +11,6 @@ Pirâmide: testes unitários do domínio > integração de persistência/adaptad
 | T-PERF-01 | Desempenho | CPU/memória em repouso e segundo plano |
 | T-SEC-01 | Segurança | importação corrompida/maliciosa e tokens revogados |
 
+Implementação inicial: `task-bar-planet-forger/tests/unit/test_production_rates.gd` verifica a produção de Biomassa e Conhecimento no domínio. O próximo runner deve executar esse teste em CI junto com casos de inventário, save e prestígio.
+
 Eventos e economia usam seeds reprodutíveis. A matriz de regressão cobre Windows 10/11, escalas DPI e múltiplos monitores. Integrações MutterGames devem usar sandbox e dublês de contrato.

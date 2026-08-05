@@ -34,6 +34,14 @@ func can_pay(cost: Dictionary) -> bool:
 			return false
 	return true
 
+func missing_resources(cost: Dictionary) -> Dictionary:
+	var missing := {}
+	for resource in cost:
+		var shortfall := float(cost[resource]) - float(amounts.get(resource, 0.0))
+		if shortfall > 0.0:
+			missing[resource] = shortfall
+	return missing
+
 func pay(cost: Dictionary) -> bool:
 	if not can_pay(cost):
 		return false

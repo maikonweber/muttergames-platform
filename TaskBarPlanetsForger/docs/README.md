@@ -7,7 +7,8 @@
 - [Visão do produto](product-vision.md)
 - [GDD](game-design-document.md)
 - [Design System, interface e geração procedural](design-system.md)
-- [Ferramenta de seeds e sprites procedurais](procedural-sprite-tool.md)
+- [Ferramenta de seeds e sprites procedurais](procedural-sprite-tool.md) · [spec Ecosystem](../../Ecosystem/tools/04-seed-lab-spec.md)
+- [Catálogo de ferramentas MutterGames](../../Ecosystem/tools/README.md)
 - [SRS](software-requirements-specification.md)
 - [Requisitos funcionais](functional-requirements.md) e [não funcionais](non-functional-requirements.md)
 - [Regras de negócio](business-rules.md), [economia](game-economy.md), [progressão](progression-system.md) e [eventos](events-system.md)
@@ -15,6 +16,8 @@
 - [Protótipo Godot](../task-bar-planet-forger/README.md)
 - [Classes e padrões de projeto](classes-and-design-patterns.md)
 - [MVP](mvp-scope.md), [testes](testing-strategy.md), [roadmap](roadmap.md)
+- [Roadmap de implementação](implementation-roadmap.md) e [UI aplicada](ui-implementation.md)
+- [Especificação do vertical slice](vertical-slice-spec.md)
 - [Conexão MutterGames](muttergames-connection-plan.md), [integração](muttergames-integration.md) e [marketplace](marketplace-plan.md)
 - [ADRs](decisions/)
 
@@ -31,6 +34,12 @@
 | Evolução discreta | Idle | US-RES-01 | UC-08 retorno offline | RF-016 | RN-006 | T-INT-04 |
 | Criar mundos | Criação | US-CRIA-01 | UC-02 criar planeta | RF-009 | RN-003 | T-UNIT-02 |
 | Desktop não intrusivo | Janela | US-DESK-01 | UC-10 alternar modo | RF-004 | RN-010 | T-E2E-03 |
+
+## Spec Ecosystem
+
+- Projeto: [`Ecosystem/projects/07-taskbar-planets.md`](../../Ecosystem/projects/07-taskbar-planets.md)
+- Integração: [`Ecosystem/game-integrations/taskbar-planets-forger.md`](../../Ecosystem/game-integrations/taskbar-planets-forger.md)
+- Seed Lab: [`Ecosystem/tools/04-seed-lab-spec.md`](../../Ecosystem/tools/04-seed-lab-spec.md)
 
 ## Convenções
 

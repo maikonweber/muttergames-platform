@@ -8,6 +8,7 @@ signal sfx_requested(sfx_name: String)
 
 const ORBITS := 3
 const MAX_OFFLINE_SECONDS := 28800.0
+const UI_REFRESH_INTERVAL := 0.25
 ## Tamanhos da janela: compacto é a "barra idle" que fica junto à borda da tela; expandido
 ## é a janela normal de gerenciamento (bordas, redimensionável, título e configurações).
 const COMPACT_SIZE := Vector2i(480, 104)
@@ -22,6 +23,7 @@ var active_event: CosmicEvent
 var elapsed := 0.0
 var event_cooldown := 55.0
 var autosave_elapsed := 0.0
+var ui_refresh_elapsed := 0.0
 var settings := GameSettings.new()
 var tutorial := TutorialState.new()
 var universe_seed := int(Time.get_unix_time_from_system())
@@ -30,7 +32,7 @@ var random := RandomNumberGenerator.new()
 func _ready() -> void:
 	load_game()
 	random.seed = universe_seed
-	get_window().size = COMPACT_SIZE if compact_mode else EXPANDED_SIZE
+	_apply_window_mode()
 	apply_settings()
 	# Necessário para que fechar a janela (X) chegue como NOTIFICATION_WM_CLOSE_REQUEST
 	# em vez de encerrar o processo imediatamente; ver _notification() abaixo, que decide
@@ -40,14 +42,29 @@ func _ready() -> void:
 	# frame é sobrescrita quando a janela é efetivamente mapeada na tela; reaplicar uma vez
 	# após o primeiro frame torna o ancoramento junto à barra de tarefas confiável.
 	await get_tree().process_frame
+	_apply_window_mode()
 	apply_settings()
 
 ## Alterna entre a barra idle (compacta, sem bordas, junto à tela) e a janela de gerenciamento
 ## (expandida, com bordas). Deve ser o único ponto de entrada para mudar compact_mode.
 func set_compact_mode(value: bool) -> void:
 	compact_mode = value
-	get_window().size = COMPACT_SIZE if compact_mode else EXPANDED_SIZE
+	_apply_window_mode()
 	apply_settings()
+
+## Compacto: desliga o stretch (senão a UI 1000×600 vira um borrão dentro de 480×104).
+## Expandido: volta ao canvas_items com viewport base 1000×600.
+func _apply_window_mode() -> void:
+	var window := get_window()
+	if compact_mode:
+		window.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
+		window.content_scale_size = Vector2i(0, 0)
+		window.size = COMPACT_SIZE
+	else:
+		window.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+		window.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+		window.content_scale_size = EXPANDED_SIZE
+		window.size = EXPANDED_SIZE
 
 func _process(delta: float) -> void:
 	if paused: return
@@ -59,6 +76,7 @@ func tick(delta: float) -> void:
 	if simulation_delta <= 0.0: return
 	elapsed += simulation_delta
 	autosave_elapsed += delta
+	ui_refresh_elapsed += delta
 	inventory.add("Energia", (1.5 + essence_upgrades * 0.15) * simulation_delta)
 	inventory.add("Materia", (0.8 + asteroids * 0.12) * simulation_delta)
 	for planet in planets: planet.evolve(simulation_delta, inventory)
@@ -71,7 +89,23 @@ func tick(delta: float) -> void:
 	if autosave_elapsed >= 30.0:
 		autosave_elapsed = 0.0
 		save_game()
-	state_changed.emit()
+	if ui_refresh_elapsed >= UI_REFRESH_INTERVAL:
+		ui_refresh_elapsed = 0.0
+		state_changed.emit()
+
+func production_rates() -> Dictionary:
+	var rates := {
+		"Materia": 0.8 + asteroids * 0.12,
+		"Energia": 1.5 + essence_upgrades * 0.15,
+		"Agua": 0.0,
+		"Biomassa": 0.0,
+		"Conhecimento": 0.0,
+	}
+	for planet in planets:
+		var planet_rates := planet.production_rates()
+		for resource in planet_rates:
+			rates[resource] = float(rates.get(resource, 0.0)) + float(planet_rates[resource])
+	return rates
 
 func create_asteroid() -> bool:
 	if not inventory.pay({"Materia": 15.0}): return false

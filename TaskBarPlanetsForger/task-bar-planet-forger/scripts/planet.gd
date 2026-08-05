@@ -32,10 +32,17 @@ func is_habitable() -> bool:
 
 func evolve(delta: float, inventory: ResourceInventory) -> void:
 	age += delta
+	var rates := production_rates()
+	for resource in rates:
+		inventory.add(resource, float(rates[resource]) * delta)
+
+func production_rates() -> Dictionary:
+	var rates := {"Biomassa": 0.0, "Conhecimento": 0.0}
 	if life:
-		inventory.add("Biomassa", 0.35 * delta)
+		rates["Biomassa"] = 0.35
 	if civilization:
-		inventory.add("Conhecimento", 0.18 * delta)
+		rates["Conhecimento"] = 0.18
+	return rates
 
 func stage_name() -> String:
 	if civilization: return "Civilizacao"
