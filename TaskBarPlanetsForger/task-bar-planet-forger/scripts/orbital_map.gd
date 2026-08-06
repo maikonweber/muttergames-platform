@@ -16,11 +16,17 @@ func set_system(planets: Array[Planet], selected_planet_id: String) -> void:
 	_planets = planets
 	_selected_planet_id = selected_planet_id
 	_positions.clear()
+	var active_ids := {}
 	for planet in _planets:
+		active_ids[planet.id] = true
 		var key := "%d:%s:%.0f:%.0f:%s:%s" % [planet.visual_seed, planet.type, planet.atmosphere, planet.water, planet.life, planet.civilization]
 		if _texture_keys.get(planet.id, "") != key:
 			_textures[planet.id] = ProceduralPlanetGenerator.render_planet(planet, 96)
 			_texture_keys[planet.id] = key
+	for planet_id in _textures.keys():
+		if not active_ids.has(planet_id):
+			_textures.erase(planet_id)
+			_texture_keys.erase(planet_id)
 	queue_redraw()
 
 func _draw() -> void:

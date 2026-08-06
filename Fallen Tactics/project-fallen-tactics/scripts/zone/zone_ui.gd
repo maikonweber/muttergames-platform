@@ -6,11 +6,14 @@ extends CanvasLayer
 @onready var status_label: Label = $Root/Top/StatusLabel
 @onready var title_label: Label = $Root/Top/TitleLabel
 @onready var help_label: Label = $Root/Bottom/HelpLabel
-@onready var pass_btn: Button = $Root/Bottom/PassBtn
-@onready var new_run_btn: Button = $Root/Bottom/NewRunBtn
-@onready var pvp_btn: Button = $Root/Bottom/PvpBtn
+@onready var pass_btn: Button = $Root/Bottom/BtnRow/PassBtn
+@onready var new_run_btn: Button = $Root/Bottom/BtnRow/NewRunBtn
+@onready var pvp_btn: Button = $Root/Bottom/BtnRow/PvpBtn
+@onready var menu_btn: Button = $Root/Bottom/BtnRow/MenuBtn
 @onready var modal: PanelContainer = $Root/Modal
 @onready var modal_box: VBoxContainer = $Root/Modal/Margin/VBox
+@onready var party_row: HBoxContainer = $Root/Top/PartyRow
+@onready var legend_label: Label = $Root/Top/LegendLabel
 
 
 func _ready() -> void:
@@ -22,18 +25,31 @@ func _ready() -> void:
 	pass_btn.pressed.connect(func(): zone.end_map_turn())
 	new_run_btn.pressed.connect(func(): zone.new_run())
 	pvp_btn.pressed.connect(_open_pvp_lobby)
+	menu_btn.pressed.connect(func(): GameState.go_to_menu())
 	MultiplayerSession.status_changed.connect(_on_log)
 	MultiplayerSession.error_received.connect(func(c, m): _on_log("[PVP %s] %s" % [c, m]))
 	MultiplayerSession.session_ready.connect(func(w):
 		_on_log("=== CÓDIGO DA SALA: %s (compartilhe) ===" % str(w.get("room_code", "")))
 	)
 	modal.visible = false
-	_on_log("Project Fallen Tactics — Zona de exploração")
-	_on_log("PVP: use o botão PVP Online (servidor ws://127.0.0.1:4010)")
+	_print_intro()
 	_refresh_status()
 
 
+func _print_intro() -> void:
+	_on_log("— Região Caída — exploração tática")
+	_on_log("Mova a party, embosque patrulhas e abra o portão do Capitão.")
+	_on_log("PVP Online disponível a qualquer momento.")
+
+
+func clear_log() -> void:
+	log_label.clear()
+
+
 func _on_log(text: String) -> void:
+	if str(text) == "__CLEAR_LOG__":
+		clear_log()
+		return
 	log_label.append_text(str(text) + "\n")
 
 
@@ -43,7 +59,7 @@ func _refresh_status() -> void:
 	var vis := zone.vision_range
 	if zone.map and zone.map.get_tile(zone.party_cell) == ZoneMap.TileType.FOREST:
 		vis = maxi(2, vis - 1)
-	status_label.text = "PM %d/%d  |  Visão %d  |  Célula %s  |  Baixas %d  |  Portão %s" % [
+	status_label.text = "PM %d/%d   ·   Visão %d   ·   Célula %s   ·   Baixas %d/2   ·   Portão %s" % [
 		zone.move_points,
 		zone.move_max,
 		vis,
@@ -51,12 +67,31 @@ func _refresh_status() -> void:
 		kills,
 		boss,
 	]
+	legend_label.text = "Legenda: 🟢 grama  ·  🟤 estrada  ·  🌲 floresta  ·  💧 água  ·  🚪 saída  ·  ☠ portão"
 	if not GameState.run_active:
-		title_label.text = "RUN ENCERRADA"
+		title_label.text = "RUN ENCERRADA — clique Nova Run"
+		title_label.modulate = Color("ff8a7a")
 	elif bool(GameState.zone.get("exit_reached", false)):
 		title_label.text = "REGIÃO CONCLUÍDA"
+		title_label.modulate = Color("ffe08a")
 	else:
 		title_label.text = "Região Caída — Exploração"
+		title_label.modulate = Color.WHITE
+	_refresh_party_strip()
+
+
+func _refresh_party_strip() -> void:
+	for c in party_row.get_children():
+		c.queue_free()
+	for hs in GameState.party:
+		var panel := PanelContainer.new()
+		var lbl := Label.new()
+		lbl.text = "%s  Lv%d" % [str(hs.get("display_name", "?")), int(hs.get("level", 1))]
+		lbl.add_theme_font_size_override("font_size", 12)
+		var col: Color = hs.get("color", Color("4aa3ff")) as Color
+		lbl.add_theme_color_override("font_color", col.lightened(0.25))
+		panel.add_child(lbl)
+		party_row.add_child(panel)
 
 
 func _hide_modal() -> void:
@@ -70,6 +105,7 @@ func _open_pvp_lobby() -> void:
 	modal.visible = true
 	var title := Label.new()
 	title.text = "PVP Online — Fallen Game Server"
+	title.add_theme_font_size_override("font_size", 18)
 	modal_box.add_child(title)
 	var hint := Label.new()
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -118,14 +154,15 @@ func _on_contact(enemy: Dictionary) -> void:
 	modal.visible = true
 	var kind := str(enemy.get("kind", "inimigo"))
 	var title := Label.new()
-	title.text = "Contato: %s" % kind
+	title.text = "Contato: %s" % kind.capitalize()
+	title.add_theme_font_size_override("font_size", 18)
 	modal_box.add_child(title)
 	var desc := Label.new()
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.text = "Uma patrulha bloqueia o caminho. Emboscar dá vantagem (surpresa)."
 	modal_box.add_child(desc)
 	var fight := Button.new()
-	fight.text = "Lutar (surpresa)"
+	fight.text = "⚔ Lutar (surpresa)"
 	fight.pressed.connect(func(): zone.start_fight(enemy, true))
 	modal_box.add_child(fight)
 	var fight2 := Button.new()
@@ -143,7 +180,8 @@ func _on_activity(poi: Dictionary) -> void:
 	modal.visible = true
 	var kind := str(poi.get("kind", "poi"))
 	var title := Label.new()
-	title.text = "Atividade: %s" % kind
+	title.text = "Atividade: %s" % kind.capitalize()
+	title.add_theme_font_size_override("font_size", 18)
 	modal_box.add_child(title)
 	match kind:
 		"ruin":

@@ -27,9 +27,13 @@ func _ready() -> void:
 	end_turn_btn.pressed.connect(_on_end_turn)
 	reward_panel.visible = false
 	_ensure_party_row()
-	_on_log("Project Fallen Tactics — Campo amplo + FOW + party 3")
-	_on_log("Um só modo: combate tático. Explore o mapa com movimento. FOW revela inimigos.")
-	_on_log("Cada herói joga no seu turno. Espaço = fim do turno.")
+	if GameState.return_to_zone:
+		_on_log("Combate da Região Caída — vitória devolve você ao mapa.")
+		_on_log("Party 3 heróis. Espaço = fim do turno. Esc = cancelar alvo.")
+		title_label.text = "Combate — Região Caída"
+	else:
+		_on_log("Project Fallen Tactics — Campo amplo + FOW + party 3")
+		_on_log("Modo treino linear (sem zona). Espaço = fim do turno.")
 	refresh_hand()
 	refresh_timeline()
 	refresh_party_strip()
@@ -178,6 +182,17 @@ func _on_end_turn() -> void:
 func _on_combat_ended(won: bool) -> void:
 	refresh_hand()
 	refresh_party_strip()
+	if GameState.return_to_zone:
+		if won:
+			title_label.text = "VITÓRIA — retornando à região"
+			_show_rewards()
+		else:
+			title_label.text = "DERROTA"
+			help_label.text = "A run encerrou. Voltando à região..."
+			_on_log("Derrota — voltando à Região Caída.")
+			await get_tree().create_timer(1.2).timeout
+			GameState.finish_combat(false)
+		return
 	if won:
 		if GameState.encounter_index >= 3:
 			_on_log("Run completa! Boss derrotado. Reinicie a cena (F5) para nova run.")
@@ -249,6 +264,10 @@ func _on_pick_reward_hero(hero_index: int) -> void:
 func _finish_reward() -> void:
 	_pending_reward_card = ""
 	reward_panel.visible = false
+	if GameState.return_to_zone:
+		_on_log("Retornando à Região Caída...")
+		GameState.finish_combat(true)
+		return
 	combat.start_encounter(GameState.next_encounter())
 	title_label.text = "Project Fallen Tactics — Campo + FOW"
 	refresh_hand()

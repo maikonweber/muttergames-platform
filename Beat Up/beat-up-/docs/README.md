@@ -9,6 +9,9 @@ Beat Up e um jogo de direcao isometrico em 2,5D ambientado em uma cidade viva e 
 - [Gameplay de entregas](./gameplay-entregas.md): regras de missao, avaliacao e falhas.
 - [Economia e MutterCoins](./economia-muttercoins.md): fontes, gastos e progressao.
 - [Direcao tecnica](./direcao-tecnica.md): como o conceito se encaixa no prototipo Godot atual.
+- [STATE_PROMPT](./STATE_PROMPT.md): estado real do codigo (contexto para agentes).
+- [Ferramentas](./tools.md): Meshy, slicer legado e creative kit.
+- Spec Ecosystem: [`Ecosystem/projects/06-beat-up.md`](../../../Ecosystem/projects/06-beat-up.md).
 
 ## Estado do projeto
 

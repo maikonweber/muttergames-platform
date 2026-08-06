@@ -2,6 +2,8 @@
 
 Cliente desktop que lê `GET /api/v1/launcher/catalog?platform=windows`, instala releases ZIP verificadas por SHA-256, atualiza quando a versão muda e abre o executável configurado. Os jogos são instalados em `%LOCALAPPDATA%\MutterGames\Games`.
 
+**Spec detalhada:** [`Ecosystem/tools/03-launcher-spec.md`](../../Ecosystem/tools/03-launcher-spec.md) · Projeto: [`Ecosystem/projects/03-launcher.md`](../../Ecosystem/projects/03-launcher.md)
+
 ## Gerar o .exe
 
 Instale o [.NET SDK 8](https://dotnet.microsoft.com/download/dotnet/8.0) e execute na raiz:

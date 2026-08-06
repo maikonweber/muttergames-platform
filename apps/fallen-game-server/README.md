@@ -10,6 +10,8 @@ Servidor dedicado autoritativo para **Fallen Tactics PVP**:
 
 Alinhado a `Fallen Tactics/project-fallen-tactics/docs/NETWORKING_SERVERS.md`.
 
+**Spec Ecosystem:** [`Ecosystem/projects/04-fallen-game-server.md`](../../Ecosystem/projects/04-fallen-game-server.md)
+
 ## Run local
 
 ```bash

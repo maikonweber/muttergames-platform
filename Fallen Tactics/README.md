@@ -1,30 +1,24 @@
-x'x'x'# Documentação — Project Fallen Tactics
+# Fallen Tactics
 
-Índice dos docs de design, produto e arquitetura.
+RPG tático + deckbuilding em Godot 4.7. A fonte canônica do protótipo é:
 
-| Documento | Conteúdo |
-|-----------|----------|
-| [`GAME_OVERVIEW.md`](GAME_OVERVIEW.md) | O jogo: high concept, pilares, loops, classes, visão |
-| [`STATE_PROMPT.md`](STATE_PROMPT.md) | Estado atual do protótipo (contexto para agentes) |
-| [`ROADMAP_3V3_WORLD.md`](ROADMAP_3V3_WORLD.md) | Roadmap 3v3, zona maior, XP, atividades no mapa |
-| [`ASSETS_AND_ANIMATIONS.md`](ASSETS_AND_ANIMATIONS.md) | Assets, sprites, animações, VFX, UI, prioridade de arte |
-| [`ASSET_INSTRUCTIONS.md`](ASSET_INSTRUCTIONS.md) | **Instruções detalhadas por asset** (brief de produção) |
-| [`P1_PRODUCTION_CHECKLIST.md`](P1_PRODUCTION_CHECKLIST.md) | Checklist P1 (VS apresentável) |
-| [`P1_production_sheet.csv`](P1_production_sheet.csv) | Planilha rastreável de assets P0/P1 |
-| [`MULTIPLAYER.md`](MULTIPLAYER.md) | Co-op, versus, autoridade, fases de multiplayer |
-| [`PORTABILITY.md`](PORTABILITY.md) | PC, Deck, Web, mobile, input, saves, builds |
-| [`NETWORKING_SERVERS.md`](NETWORKING_SERVERS.md) | WebSocket, UDP, protocolo, serviços, segurança |
+[`project-fallen-tactics/`](project-fallen-tactics/)
 
-## Ordem de leitura sugerida
+A pasta `project-fallen-tactics-(4.3)/` é snapshot legado — não usar como base de features novas.
 
-1. **GAME_OVERVIEW** — o que o jogo é  
-2. **STATE_PROMPT** — o que já existe no código  
-3. **ROADMAP_3V3_WORLD** — para onde o single-player vai  
-4. **ASSETS_AND_ANIMATIONS** — o que produzir de arte/anim  
-5. **MULTIPLAYER** + **NETWORKING_SERVERS** — camada online  
-6. **PORTABILITY** — como chega em cada plataforma  
+## Documentação
 
-## Regra
+Índice completo: [`project-fallen-tactics/docs/README.md`](project-fallen-tactics/docs/README.md)
 
-Documentos de visão podem adiantar o código.  
-**STATE_PROMPT** deve refletir o que está **realmente** implementado.
+| Documento | Uso |
+|---|---|
+| `GAME_OVERVIEW.md` | High concept e pilares |
+| `STATE_PROMPT.md` | Estado real do código (contexto para agentes) |
+| `MULTIPLAYER.md` / `NETWORKING_SERVERS.md` | Online |
+| `ASSETS_AND_ANIMATIONS.md` | Produção de arte |
+
+## Plataforma
+
+- Game server PVP: [`apps/fallen-game-server`](../apps/fallen-game-server/README.md)
+- Integração ecossistema: [`Ecosystem/game-integrations/fallen-tactics.md`](../Ecosystem/game-integrations/fallen-tactics.md)
+- Assets compartilhados: [`Ecosystem/tools/02-creative-tools-spec.md`](../Ecosystem/tools/02-creative-tools-spec.md)

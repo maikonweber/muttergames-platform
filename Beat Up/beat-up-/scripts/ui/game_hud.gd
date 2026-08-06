@@ -10,6 +10,7 @@ const AssetArt = preload("res://scripts/world/asset_art.gd")
 var _radio_plate: TextureRect
 var _radio_label: Label
 var _wanted: TextureRect
+var _coins_label: Label
 
 
 func _ready() -> void:
@@ -19,6 +20,8 @@ func _ready() -> void:
 		RadioManager.station_changed.connect(_on_station)
 		RadioManager.radio_toggled.connect(_on_radio_toggled)
 		_refresh_radio()
+	if GameManager != null:
+		GameManager.mutter_coins_changed.connect(_on_mutter_coins_changed)
 
 
 ## Monta controles por código (sem .tscn) para manter o HUD desacoplado.
@@ -43,6 +46,13 @@ func _build() -> void:
 	_radio_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.9))
 	_radio_label.text = "Radio"
 	root.add_child(_radio_label)
+
+	_coins_label = Label.new()
+	_coins_label.position = Vector2(28, 88)
+	_coins_label.add_theme_font_size_override("font_size", 16)
+	_coins_label.add_theme_color_override("font_color", Color(0.95, 0.75, 0.2))
+	_coins_label.text = "MutterCoins: %d" % GameManager.mutter_coins
+	root.add_child(_coins_label)
 
 	# Placeholder visual — liga a um sistema de heat na Fase 1.
 	_wanted = TextureRect.new()
@@ -73,3 +83,8 @@ func _refresh_radio() -> void:
 	if RadioManager == null:
 		return
 	_radio_label.text = RadioManager.get_station_label()
+
+
+func _on_mutter_coins_changed(balance: int) -> void:
+	if _coins_label != null:
+		_coins_label.text = "MutterCoins: %d" % balance

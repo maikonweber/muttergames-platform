@@ -35,20 +35,23 @@ Se a feature não passar no filtro (diversão, profundidade, builds, rejogabilid
 |------|--------|
 | Fase | **Vertical Slice jogável (protótipo)** |
 | Engine | **Godot 4.7** (Forward+) |
-| Path | `C:\Users\plugify\Documents\project-fallen-tactics` |
-| Main scene | `res://scenes/combat/combat_scene.tscn` |
-| Godot exe | `C:\Users\plugify\Downloads\Godot_v4.7-stable_win64.exe\Godot_v4.7-stable_win64.exe` |
+| Path (monorepo) | `Fallen Tactics/project-fallen-tactics/` |
+| Main scene | `res://scenes/ui/main_menu.tscn` |
 | Resolução | 1280×720 |
-| Autoload | `GameState` → `scripts/autoload/game_state.gd` |
-| Loop | **Um só modo: combate.** Campo **16×10** iso + **FOW** (visão 4 da party). Party 3. Inimigos ocultos até visão. Sem mapa de exploração separado. |
+| Autoloads | `GameState`, `AudioBus`, `NetClient`, `MultiplayerSession` |
+| Loop | Menu → zona/mapa e combate; PVP via game server. Campo de combate **16×10** iso + **FOW**. Party 3. |
 | Pasta `data/cards`, `data/units`, `data/encounters` | Existem, mas **ainda vazias** (dados estão em GDScript) |
+| Legado | `project-fallen-tactics-(4.3)/` — não usar como base |
+| Game server | `apps/fallen-game-server` |
 
 ### Como rodar
 
 ```text
-Godot --path "C:\Users\plugify\Documents\project-fallen-tactics"
-Godot --path "C:\Users\plugify\Documents\project-fallen-tactics" --editor
+Godot --path "Fallen Tactics/project-fallen-tactics"
+Godot --path "Fallen Tactics/project-fallen-tactics" --editor
 ```
+
+(Ajuste o path absoluto conforme o clone local, ex.: `...\MutterGames\Fallen Tactics\project-fallen-tactics`.)
 
 ### Controles atuais
 

@@ -1,5 +1,7 @@
 @import "./marketplace.css";
 
+.coin-card{display:flex;flex-direction:column;gap:10px}.coin-balance{font-size:34px;color:var(--core-500);letter-spacing:-.04em}.coin-balance small{font-size:14px;color:var(--artifact-200)}.coin-entry{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #3d4849;padding-top:9px;font-size:13px;color:#c8cecc}.coin-credit{color:var(--success)}.coin-debit{color:#ff958b}
+
 .library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.library-grid .game-card{min-height:360px}.game-card small{position:relative;color:#aeb6b4;line-height:1.45;margin:0 0 18px}.game-card .button{position:relative;width:max-content}.launcher-help{grid-column:1/-1;color:#aeb6b4;margin:4px 0 0}.launcher-help a{color:var(--core-500);text-decoration:underline}.library-loading{color:#aeb6b4;min-height:360px}.games-grid{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:560px){.library-grid,.games-grid{grid-template-columns:1fr}}
 
 :root {

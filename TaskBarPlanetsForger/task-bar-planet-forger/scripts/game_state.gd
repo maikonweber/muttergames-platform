@@ -17,6 +17,8 @@ var inventory := ResourceInventory.new()
 var planets: Array[Planet] = []
 var asteroids := 0
 var essence_upgrades := 0
+## Saldo local pendente de sincronização com a API central.
+var mutter_coins := 0
 var paused := false
 var compact_mode := true # Padrão: iniciar como barra idle junto à tela, não janela cheia.
 var active_event: CosmicEvent
@@ -165,6 +167,7 @@ func prestige() -> bool:
 	if planets.size() < ORBITS: return false
 	var reward: int = maxi(1, int(sqrt(planets.size() * 4.0)))
 	inventory.add("Essencia", reward)
+	mutter_coins += reward * 10
 	essence_upgrades += reward
 	planets.clear(); asteroids = 0
 	if tutorial.current_step == 5: tutorial.complete_current()
@@ -202,6 +205,7 @@ func save_game() -> bool:
 		"asteroids": asteroids,
 		"planets": planets.map(func(p: Planet) -> Dictionary: return p.serialize()),
 		"essence_upgrades": essence_upgrades,
+		"mutter_coins": mutter_coins,
 		"settings": settings.serialize(),
 		"tutorial": tutorial.serialize(),
 		"compact_mode": compact_mode,
@@ -212,7 +216,7 @@ func load_game() -> void:
 	var data: Dictionary = SaveService.load()
 	if data.is_empty(): return
 	inventory.deserialize(data.get("inventory", {}) as Dictionary)
-	asteroids = int(data.get("asteroids", 0)); essence_upgrades = int(data.get("essence_upgrades", 0))
+	asteroids = int(data.get("asteroids", 0)); essence_upgrades = int(data.get("essence_upgrades", 0)); mutter_coins = int(data.get("mutter_coins", 0))
 	universe_seed = int(data.get("universe_seed", universe_seed)); random.seed = universe_seed
 	settings.deserialize(data.get("settings", {}) as Dictionary)
 	tutorial.deserialize(data.get("tutorial", {}) as Dictionary)

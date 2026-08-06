@@ -14,3 +14,6 @@ static func run() -> void:
 	assert(is_equal_approx(float(inventory.amounts["Conhecimento"]) - before_knowledge, 1.8))
 	assert(planet.production_rates()["Biomassa"] == 0.35)
 	assert(planet.production_rates()["Conhecimento"] == 0.18)
+	var missing := inventory.missing_resources({"Materia": 90.0, "Energia": 10.0})
+	assert(is_equal_approx(float(missing["Materia"]), 20.0))
+	assert(not missing.has("Energia"))

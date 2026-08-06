@@ -6,11 +6,14 @@ const _ClassLibrary = preload("res://scripts/data/class_library.gd")
 const ZONE_SCENE := "res://scenes/zone/zone_scene.tscn"
 const COMBAT_SCENE := "res://scenes/combat/combat_scene.tscn"
 const PVP_ARENA_SCENE := "res://scenes/pvp/pvp_arena.tscn"
+const MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 
 var run_active: bool = false
 var relic_ids: Array[String] = []
 var encounter_index: int = 0
 var last_combat_won: bool = false
+## Saldo local pendente de sincronização com o ledger da plataforma.
+var mutter_coins: int = 0
 
 ## Party heroes
 var party: Array = []
@@ -144,6 +147,7 @@ func finish_combat(won: bool) -> void:
 		"encounter_id": str(combat_setup.get("encounter_id", "")),
 	}
 	if won:
+		mutter_coins += 5
 		encounter_index += 1
 		var eid := str(combat_setup.get("enemy_map_id", ""))
 		if zone.has("enemies"):
@@ -167,3 +171,8 @@ func go_to_zone() -> void:
 	if not run_active:
 		start_new_run()
 	get_tree().change_scene_to_file(ZONE_SCENE)
+
+
+func go_to_menu() -> void:
+	pvp_active = false
+	get_tree().change_scene_to_file(MENU_SCENE)

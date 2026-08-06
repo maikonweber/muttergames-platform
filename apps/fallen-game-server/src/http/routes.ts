@@ -42,6 +42,15 @@ export function createHttpHandler(rooms: RoomManager) {
       return;
     }
 
+    if (req.method === 'GET' && url.pathname === '/v1/economy') {
+      sendJson(res, 200, {
+        currency: { symbol: 'MUTTER', decimals: 9, settlement: 'central-api-ledger' },
+        gameId: config.gameId,
+        rewardPolicy: 'Only server-validated match results may call POST /api/v1/muttercoins/internal/game-rewards.',
+      });
+      return;
+    }
+
     if (req.method === 'GET' && url.pathname === '/v1/rooms') {
       sendJson(res, 200, { rooms: rooms.listRooms() });
       return;

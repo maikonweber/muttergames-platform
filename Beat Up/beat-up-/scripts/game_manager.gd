@@ -14,9 +14,11 @@ enum GameState {
 }
 
 signal score_changed(score: int)
+signal mutter_coins_changed(balance: int)
 signal state_changed(state: GameState)
 
 var score: int = 0
+var mutter_coins: int = 0
 var state: GameState = GameState.MENU
 
 
@@ -27,12 +29,19 @@ func _ready() -> void:
 ## Zera score e entra em PLAYING. Chamado por `main.gd` no boot.
 func start_game() -> void:
 	score = 0
+	mutter_coins = 0
+	mutter_coins_changed.emit(mutter_coins)
 	change_state(GameState.PLAYING)
 
 
 func add_score(points: int) -> void:
+	var previous_tier := score / 100
 	score += points
 	score_changed.emit(score)
+	var current_tier := score / 100
+	if current_tier > previous_tier:
+		mutter_coins += current_tier - previous_tier
+		mutter_coins_changed.emit(mutter_coins)
 
 
 ## Troca de estado (idempotente — não reemite se for o mesmo).

@@ -13,6 +13,7 @@ import { GamesModule } from './games/games.module';
 import { HealthModule } from './health/health.module';
 import { LauncherModule } from './launcher/launcher.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { MutterCoinsModule } from './mutter-coins/mutter-coins.module';
 import { MetricsInterceptor } from './observability/metrics.interceptor';
 import { ObservabilityModule } from './observability/observability.module';
 import { PatchesModule } from './patches/patches.module';
@@ -49,6 +50,7 @@ import { WalletsModule } from './wallets/wallets.module';
     ChainModule,
     BlockchainModule,
     MarketplaceModule,
+    MutterCoinsModule,
     WalletsModule,
     LauncherModule,
   ],

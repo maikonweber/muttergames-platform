@@ -14,6 +14,12 @@ Demonstrar o ciclo completo de criar, ler, evoluir e reiniciar um sistema solar 
 | VS-01D | Miniaturas | Concluído | Rochoso, Oceânico e Vulcânico são determinísticos por `visual_seed`. |
 | VS-02A | Ações explicáveis | Concluído | Toda ação informa custo, requisito e falta de recurso. |
 | VS-02B | Confirmação de supernova | Concluído | O prestígio requer confirmação deliberada antes de reiniciar o sistema. |
+
+## Correções pós-revisão VS-02
+
+- Atualizações de recursos deixam de reconstruir a lista de órbitas quando a topologia não mudou.
+- O cache de miniaturas remove texturas de planetas que já não pertencem ao sistema.
+- A aplicação de tema não usa mais um nó genérico onde um `Button` era esperado.
 | VS-03A | Feed de eventos | Pendente | Últimos eventos persistem e podem ser lidos após retorno offline. |
 | VS-04A | Recuperação de save | Pendente | Corrupção oferece backup sem sobrescrever a evidência. |
 

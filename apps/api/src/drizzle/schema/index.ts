@@ -114,6 +114,42 @@ export const walletLinks = pgTable(
   ],
 );
 
+/** Saldo off-chain de $MUTTER. A fonte de verdade para auditoria é o ledger abaixo. */
+export const mutterCoinBalances = pgTable(
+  'mutter_coin_balances',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    balanceAtomic: bigint('balance_atomic', { mode: 'bigint' }).notNull().default(0n),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
+/** Lançamentos imutáveis: positivos creditam e negativos debitm MutterCoins. */
+export const mutterCoinLedger = pgTable(
+  'mutter_coin_ledger',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    gameId: uuid('game_id').references(() => games.id, { onDelete: 'set null' }),
+    amountAtomic: bigint('amount_atomic', { mode: 'bigint' }).notNull(),
+    balanceAfterAtomic: bigint('balance_after_atomic', { mode: 'bigint' }).notNull(),
+    kind: text('kind').notNull(),
+    description: text('description').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('mutter_coin_ledger_idempotency_uidx').on(t.idempotencyKey),
+    index('mutter_coin_ledger_user_created_idx').on(t.userId, t.createdAt),
+    index('mutter_coin_ledger_game_idx').on(t.gameId),
+  ],
+);
+
 export const marketplaceItems = pgTable(
   'marketplace_items',
   {

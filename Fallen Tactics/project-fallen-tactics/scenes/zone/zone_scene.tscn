@@ -31,74 +31,107 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="BgTint" type="ColorRect" parent="ZoneUI/Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.08, 0.35)
+
 [node name="Top" type="VBoxContainer" parent="ZoneUI/Root"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 12.0
-offset_top = 8.0
-offset_right = -12.0
-offset_bottom = 70.0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = 110.0
 grow_horizontal = 2
+theme_override_constants/separation = 4
 
 [node name="TitleLabel" type="Label" parent="ZoneUI/Root/Top"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "Região Caída — Exploração"
 
 [node name="StatusLabel" type="Label" parent="ZoneUI/Root/Top"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.82, 0.88, 0.95, 1)
 text = "PM —"
+
+[node name="PartyRow" type="HBoxContainer" parent="ZoneUI/Root/Top"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LegendLabel" type="Label" parent="ZoneUI/Root/Top"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.65, 0.7, 0.75, 1)
+text = "Legenda"
 
 [node name="Side" type="PanelContainer" parent="ZoneUI/Root"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -340.0
-offset_top = 90.0
-offset_right = -12.0
-offset_bottom = 420.0
+offset_left = -360.0
+offset_top = 120.0
+offset_right = -14.0
+offset_bottom = 460.0
 
 [node name="Log" type="RichTextLabel" parent="ZoneUI/Root/Side"]
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(320, 320)
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = true
 scroll_following = true
 
-[node name="Bottom" type="HBoxContainer" parent="ZoneUI/Root"]
+[node name="Bottom" type="VBoxContainer" parent="ZoneUI/Root"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -90.0
-offset_right = -12.0
+offset_left = 16.0
+offset_top = -100.0
+offset_right = -16.0
 offset_bottom = -12.0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="HelpLabel" type="Label" parent="ZoneUI/Root/Bottom"]
 layout_mode = 2
-size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
-text = "FOW: preto=inexplorado, escuro=memória, claro=visão. Mover adjacente. Espaço=turno mapa."
+theme_override_colors/font_color = Color(0.75, 0.8, 0.85, 1)
+text = "FOW: preto=inexplorado, escuro=memória, claro=visão. Clique adjacente para mover. Espaço = turno do mapa."
 
-[node name="PassBtn" type="Button" parent="ZoneUI/Root/Bottom"]
-custom_minimum_size = Vector2(140, 40)
+[node name="BtnRow" type="HBoxContainer" parent="ZoneUI/Root/Bottom"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="PassBtn" type="Button" parent="ZoneUI/Root/Bottom/BtnRow"]
+custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
 text = "Passar turno (Espaço)"
 
-[node name="NewRunBtn" type="Button" parent="ZoneUI/Root/Bottom"]
-custom_minimum_size = Vector2(120, 40)
+[node name="NewRunBtn" type="Button" parent="ZoneUI/Root/Bottom/BtnRow"]
+custom_minimum_size = Vector2(120, 42)
 layout_mode = 2
 text = "Nova Run"
 
-[node name="PvpBtn" type="Button" parent="ZoneUI/Root/Bottom"]
-custom_minimum_size = Vector2(100, 40)
+[node name="PvpBtn" type="Button" parent="ZoneUI/Root/Bottom/BtnRow"]
+custom_minimum_size = Vector2(120, 42)
 layout_mode = 2
 text = "PVP Online"
+
+[node name="MenuBtn" type="Button" parent="ZoneUI/Root/Bottom/BtnRow"]
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+text = "Menu"
 
 [node name="Modal" type="PanelContainer" parent="ZoneUI/Root"]
 visible = false
@@ -108,18 +141,18 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -140.0
-offset_right = 240.0
-offset_bottom = 140.0
+offset_left = -260.0
+offset_top = -160.0
+offset_right = 260.0
+offset_bottom = 160.0
 
 [node name="Margin" type="MarginContainer" parent="ZoneUI/Root/Modal"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
 
 [node name="VBox" type="VBoxContainer" parent="ZoneUI/Root/Modal/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10

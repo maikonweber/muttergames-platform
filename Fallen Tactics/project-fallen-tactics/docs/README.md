@@ -28,3 +28,9 @@
 
 Documentos de visão podem adiantar o código.  
 **STATE_PROMPT** deve refletir o que está **realmente** implementado.
+
+## Spec Ecosystem
+
+- Projeto: [`Ecosystem/projects/05-fallen-tactics.md`](../../../Ecosystem/projects/05-fallen-tactics.md)
+- Game server: [`Ecosystem/projects/04-fallen-game-server.md`](../../../Ecosystem/projects/04-fallen-game-server.md)
+- Integração: [`Ecosystem/game-integrations/fallen-tactics.md`](../../../Ecosystem/game-integrations/fallen-tactics.md)

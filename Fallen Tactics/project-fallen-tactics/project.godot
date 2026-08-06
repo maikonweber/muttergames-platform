@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Project Fallen Tactics"
 config/description="RPG Roguelike Tactical Deckbuilder — Vertical Slice"
-run/main_scene="res://scenes/zone/zone_scene.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

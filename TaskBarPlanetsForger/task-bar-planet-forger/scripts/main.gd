@@ -34,6 +34,7 @@ var _dragging := false
 var _drag_offset := Vector2i.ZERO
 var _auto_expanded_for_event := false
 var _selected_planet_id := ""
+var _orbit_view_signature := ""
 
 const COLOR_VOID := Color("09111b")
 const COLOR_PANEL := Color("101e2b")
@@ -73,8 +74,6 @@ func _apply_ui_theme() -> void:
 	atmosphere_bar.add_theme_stylebox_override("fill", _box(Color("4f95b1"), COLOR_CYAN, 4))
 	water_bar.add_theme_stylebox_override("background", _box(Color("09131e"), COLOR_BORDER, 4))
 	water_bar.add_theme_stylebox_override("fill", _box(Color("246fa0"), COLOR_CYAN, 4))
-	for node in get_tree().get_nodes_in_group("ui_button"):
-		_style_button(node)
 	_style_all_buttons(self)
 
 func _style_button(button: Button) -> void:
@@ -186,6 +185,7 @@ func refresh() -> void:
 		amounts["Materia"], amounts["Energia"], amounts["Agua"], amounts["Biomassa"]
 	]
 	idle_status.text = _idle_status_text()
+	idle_resources.text += "  |  MC %d" % GameState.mutter_coins
 	asteroid_label.text = "Asteroides: %d / 2 necessarios" % GameState.asteroids
 	tutorial_label.text = GameState.tutorial.current_text()
 	tutorial_label.visible = not GameState.tutorial.dismissed
@@ -193,6 +193,12 @@ func refresh() -> void:
 	content.scale = Vector2(scale, scale)
 	modulate.a = GameState.settings.window_opacity
 	_sync_pause_buttons()
+	var orbit_signature := _current_orbit_view_signature()
+	if orbit_signature == _orbit_view_signature:
+		_refresh_orbit_action_states()
+		_refresh_inspector()
+		return
+	_orbit_view_signature = orbit_signature
 	for child in orbits_box.get_children(): child.queue_free()
 	for orbit in GameState.ORBITS:
 		var planet := GameState.planet_at_orbit(orbit)
@@ -204,7 +210,7 @@ func refresh() -> void:
 		if planet == null:
 			label.text = "Orbita %d — vazia" % (orbit + 1)
 			var forge := Button.new()
-			_apply_action_state(forge, "Forjar planeta", {"Materia": 25.0, "Energia": 15.0}, "2 asteroides" if GameState.asteroids < 2 else "")
+			_register_orbit_action(forge, "Forjar planeta", {"Materia": 25.0, "Energia": 15.0}, "2 asteroides" if GameState.asteroids < 2 else "")
 			_style_button(forge)
 			forge.pressed.connect(func(): GameState.forge_planet(orbit))
 			row.add_child(label); row.add_child(forge)
@@ -214,20 +220,44 @@ func refresh() -> void:
 			select.pressed.connect(func(): _select_planet(planet.id))
 			var action := Button.new()
 			if not planet.is_habitable():
-				_apply_action_state(action, "Terraformar", {"Agua": 12.0, "Energia": 20.0})
+				_register_orbit_action(action, "Terraformar", {"Agua": 12.0, "Energia": 20.0})
 				action.pressed.connect(func(): GameState.terraform(planet))
 			elif not planet.life:
-				_apply_action_state(action, "Iniciar vida", {"Agua": 10.0, "Energia": 15.0})
+				_register_orbit_action(action, "Iniciar vida", {"Agua": 10.0, "Energia": 15.0})
 				action.pressed.connect(func(): GameState.start_life(planet))
 			elif not planet.civilization:
-				_apply_action_state(action, "Evoluir civilizacao", {"Biomassa": 35.0, "Conhecimento": 20.0})
+				_register_orbit_action(action, "Evoluir civilizacao", {"Biomassa": 35.0, "Conhecimento": 20.0})
 				action.pressed.connect(func(): GameState.advance_civilization(planet))
-			else: _apply_action_state(action, "Civilizacao ativa", {}, "marco concluido")
+			else: _register_orbit_action(action, "Civilizacao ativa", {}, "marco concluido")
 			_style_button(action)
 			row.add_child(label); row.add_child(select); row.add_child(action)
 		orbits_box.add_child(row)
 	_refresh_inspector()
 	orbital_map.set_system(GameState.planets, _selected_planet_id)
+
+func _current_orbit_view_signature() -> String:
+	var parts := [str(GameState.asteroids)]
+	for orbit in GameState.ORBITS:
+		var planet := GameState.planet_at_orbit(orbit)
+		if planet == null:
+			parts.append("empty")
+		else:
+			parts.append("%s:%s:%.0f:%.0f" % [planet.id, planet.stage_name(), planet.atmosphere, planet.water])
+	return "|".join(parts)
+
+func _register_orbit_action(button: Button, title: String, cost: Dictionary, requirement := "") -> void:
+	button.set_meta("orbit_action", true)
+	button.set_meta("orbit_title", title)
+	button.set_meta("orbit_cost", cost)
+	button.set_meta("orbit_requirement", requirement)
+	_apply_action_state(button, title, cost, requirement)
+
+func _refresh_orbit_action_states() -> void:
+	for row in orbits_box.get_children():
+		for child in row.get_children():
+			if child is Button and child.has_meta("orbit_action"):
+				var cost: Dictionary = child.get_meta("orbit_cost", {})
+				_apply_action_state(child, str(child.get_meta("orbit_title")), cost, str(child.get_meta("orbit_requirement")))
 
 func _select_planet(planet_id: String) -> void:
 	_selected_planet_id = planet_id

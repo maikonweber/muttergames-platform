@@ -38,10 +38,24 @@ func _ready() -> void:
 	_center_camera()
 	if not GameState.run_active:
 		GameState.start_new_run()
-	# Single combat mode (no zone loop)
-	GameState.return_to_zone = false
-	GameState.combat_setup.clear()
-	start_encounter(GameState.next_encounter())
+
+	## Zone handoff: keep combat_setup / return_to_zone and start that encounter.
+	## Direct combat (debug): linear encounters without zone loop.
+	var from_zone := bool(GameState.combat_setup.get("from_zone", false)) or GameState.return_to_zone
+	if from_zone:
+		var enc_id := str(GameState.combat_setup.get("encounter_id", GameState.next_encounter()))
+		start_encounter(enc_id)
+		if bool(GameState.combat_setup.get("surprise", false)) or bool(GameState.zone.get("altar_buff", false)):
+			GameState.zone["altar_buff"] = false
+			emit_signal("log_message", "Emboscada! Inimigos começam atrasados na timeline.")
+			for u in units:
+				if u.alive and not u.is_player:
+					u.timeline_value += 4
+			emit_signal("timeline_changed")
+	else:
+		GameState.return_to_zone = false
+		GameState.combat_setup.clear()
+		start_encounter(GameState.next_encounter())
 
 
 func _center_camera() -> void:
@@ -505,10 +519,14 @@ func _end_combat(won: bool) -> void:
 	GameState.last_combat_won = won
 	if won:
 		emit_signal("log_message", "★★ VITÓRIA ★★")
-		GameState.encounter_index += 1
+		## Linear (non-zone) mode advances the encounter index here.
+		## Zone mode lets GameState.finish_combat() own that + map kills.
+		if not GameState.return_to_zone:
+			GameState.encounter_index += 1
 	else:
 		emit_signal("log_message", "✕ DERROTA — a run termina.")
-		GameState.run_active = false
+		if not GameState.return_to_zone:
+			GameState.run_active = false
 	combat_ended.emit(won)
 
 

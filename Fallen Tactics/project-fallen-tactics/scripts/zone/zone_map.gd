@@ -18,10 +18,38 @@ var visible_now: Dictionary = {}
 const UNEXPLORED_COLOR := Color("0a0812")
 const EXPLORED_DIM := 0.38
 
+var _tex_grass: Texture2D
+var _tex_grass2: Texture2D
+var _tex_road: Texture2D
+var _tex_forest: Texture2D
+var _tex_water: Texture2D
+var _tex_exit: Texture2D
+var _tex_gate: Texture2D
+var _use_textures: bool = false
+
 
 func _ready() -> void:
+	_load_textures()
 	if tiles.is_empty():
 		setup(width, height)
+
+
+func _load_textures() -> void:
+	## Reuse combat iso tiles until dedicated zone art lands in assets/tiles/zone/.
+	_tex_grass = _try_tex("res://assets/tiles/combat/grass_01.png")
+	_tex_grass2 = _try_tex("res://assets/tiles/combat/grass_02.png")
+	_tex_road = _try_tex("res://assets/tiles/combat/stone_01.png")
+	_tex_forest = _try_tex("res://assets/tiles/combat/elevated_01.png")
+	_tex_water = _try_tex("res://assets/tiles/combat/water_01.png")
+	_tex_exit = _try_tex("res://assets/tiles/combat/stone_01.png")
+	_tex_gate = _try_tex("res://assets/tiles/combat/wall_01.png")
+	_use_textures = _tex_grass != null
+
+
+func _try_tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	return null
 
 
 func setup(w: int, h: int) -> void:
@@ -210,23 +238,57 @@ func _draw_tile(cell: Vector2i) -> void:
 		_draw_diamond_outline(c, Color(0.02, 0.02, 0.04, 0.95))
 		return
 	var t := get_tile(cell)
-	var col := _tile_color(t)
-	if t == TileType.GRASS and (cell.x + cell.y) % 2 == 0:
-		col = col.lightened(0.05)
-	if not vis:
-		# Memory fog: dim + cool tint
-		col = col.darkened(1.0 - EXPLORED_DIM)
-		col = col.lerp(Color("1a1830"), 0.35)
-		col.a = 1.0
-	_draw_diamond(c, col)
-	_draw_diamond_outline(c, Color(0.05, 0.05, 0.08, 0.85) if vis else Color(0.08, 0.08, 0.12, 0.7))
-	if not vis:
-		# Soft overlay shroud
-		_draw_diamond(c, Color(0.05, 0.04, 0.1, 0.35), 0.98)
+	var tex := _tex_for(t, cell)
+	if tex != null:
+		var top_left := _ZM.tile_top_left(cell, Vector2.ZERO)
+		var modulate := Color.WHITE
+		if not vis:
+			modulate = Color(0.45, 0.48, 0.62, 1.0)
+		draw_texture(tex, top_left, modulate)
+		if not vis:
+			_draw_diamond(c, Color(0.05, 0.04, 0.1, 0.4), 0.98)
+	else:
+		var col := _tile_color(t)
+		if t == TileType.GRASS and (cell.x + cell.y) % 2 == 0:
+			col = col.lightened(0.05)
+		if not vis:
+			col = col.darkened(1.0 - EXPLORED_DIM)
+			col = col.lerp(Color("1a1830"), 0.35)
+			col.a = 1.0
+		_draw_diamond(c, col)
+		_draw_diamond_outline(c, Color(0.05, 0.05, 0.08, 0.85) if vis else Color(0.08, 0.08, 0.12, 0.7))
+		if not vis:
+			_draw_diamond(c, Color(0.05, 0.04, 0.1, 0.35), 0.98)
+	# Accent outline for special tiles
+	if vis and (t == TileType.EXIT or t == TileType.BOSS_GATE):
+		var accent := Color("c9a227") if t == TileType.EXIT else Color("ff5a4a")
+		_draw_diamond_outline(c, accent)
 	if _highlights.has(cell) and vis:
 		var h: Color = _highlights[cell]
 		h.a = 0.4
 		_draw_diamond(c, h, 0.9)
+
+
+func _tex_for(t: TileType, cell: Vector2i) -> Texture2D:
+	if not _use_textures:
+		return null
+	match t:
+		TileType.GRASS:
+			if _tex_grass2 and ((cell.x + cell.y) % 2 == 0):
+				return _tex_grass2
+			return _tex_grass
+		TileType.ROAD:
+			return _tex_road
+		TileType.FOREST:
+			return _tex_forest if _tex_forest else _tex_grass
+		TileType.WATER:
+			return _tex_water
+		TileType.EXIT:
+			return _tex_exit if _tex_exit else _tex_road
+		TileType.BOSS_GATE:
+			return _tex_gate if _tex_gate else _tex_road
+		_:
+			return _tex_grass
 
 
 func _diamond_pts(center: Vector2, scale: float = 1.0) -> PackedVector2Array:

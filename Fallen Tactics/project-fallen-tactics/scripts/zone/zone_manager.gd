@@ -144,20 +144,36 @@ func _add_marker(cell: Vector2i, color: Color, label: String, scale: float) -> v
 	var n := Node2D.new()
 	n.position = map.cell_to_world(cell)
 	n.z_index = cell.x + cell.y + 10
+	var shadow := Polygon2D.new()
+	shadow.color = Color(0, 0, 0, 0.45)
+	var ss := 12.0 * scale
+	shadow.polygon = PackedVector2Array([
+		Vector2(0, -ss * 0.35), Vector2(ss * 0.85, ss * 0.15), Vector2(0, ss * 0.45), Vector2(-ss * 0.85, ss * 0.15)
+	])
+	shadow.position = Vector2(0, 4)
+	n.add_child(shadow)
 	var poly := Polygon2D.new()
 	poly.color = color
-	var s := 10.0 * scale
+	var s := 12.0 * scale
 	poly.polygon = PackedVector2Array([
 		Vector2(0, -s), Vector2(s * 0.9, 0), Vector2(0, s * 0.55), Vector2(-s * 0.9, 0)
 	])
 	n.add_child(poly)
+	var outline := Line2D.new()
+	outline.width = 1.5
+	outline.default_color = Color(1, 1, 1, 0.55)
+	outline.closed = true
+	outline.points = PackedVector2Array([
+		Vector2(0, -s), Vector2(s * 0.9, 0), Vector2(0, s * 0.55), Vector2(-s * 0.9, 0)
+	])
+	n.add_child(outline)
 	var lab := Label.new()
 	lab.text = label
-	lab.position = Vector2(-24, -22)
-	lab.add_theme_font_size_override("font_size", 10)
-	lab.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	lab.add_theme_constant_override("outline_size", 3)
-	lab.custom_minimum_size = Vector2(48, 12)
+	lab.position = Vector2(-28, -28)
+	lab.add_theme_font_size_override("font_size", 11)
+	lab.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+	lab.add_theme_constant_override("outline_size", 4)
+	lab.custom_minimum_size = Vector2(56, 14)
 	lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	n.add_child(lab)
 	entities.add_child(n)
@@ -434,10 +450,15 @@ func _mark_poi_used(pid: String) -> void:
 
 
 func new_run() -> void:
+	hide_modals.emit()
 	GameState.start_new_run()
 	_load_from_state()
 	_refresh_view()
-	emit_signal("log_message", "Nova run na Região Caída.")
+	emit_signal("log_message", "__CLEAR_LOG__")
+	emit_signal("log_message", "— Nova run iniciada na Região Caída —")
+	emit_signal("log_message", "Fog of war ativo (visão %d). Explore, lute, abra o portão." % vision_range)
+	emit_signal("log_message", "Clique tiles adjacentes para mover. Espaço = turno do mapa.")
+	state_changed.emit()
 
 
 func _unhandled_input(event: InputEvent) -> void:

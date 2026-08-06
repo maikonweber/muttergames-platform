@@ -4,7 +4,7 @@
 **Data:** 2026-08-04  
 **Status:** especificação integrada para revisão de Produto, Engenharia, Segurança e Jurídico
 
-Este pacote conecta **Fallen Tactics**, **Beat Up** e a infraestrutura **MutterCoin/MutterCorps** sem tornar blockchain obrigatória para jogar. O servidor continua autoritativo sobre gameplay; a chain registra somente propriedade, liquidação e operações econômicas que precisam ser verificáveis.
+Este pacote conecta **Fallen Tactics**, **Beat Up**, **Taskbar Planets Forger** e a infraestrutura **MutterCoin/MutterCorps** sem tornar blockchain obrigatória para jogar. O servidor continua autoritativo sobre gameplay; a chain registra somente propriedade, liquidação e operações econômicas que precisam ser verificáveis.
 
 ## Decisões principais
 
@@ -19,6 +19,7 @@ Este pacote conecta **Fallen Tactics**, **Beat Up** e a infraestrutura **MutterC
 
 | Área | Documento |
 |---|---|
+| **Catálogo de projetos** | [projects/README.md](projects/README.md) |
 | Visão e limites | [product-specs/01-product-spec.md](product-specs/01-product-spec.md) |
 | Arquitetura e dados | [architecture/01-system-architecture.md](architecture/01-system-architecture.md) |
 | Identidade e wallet | [architecture/02-identity-wallet.md](architecture/02-identity-wallet.md) |
@@ -27,9 +28,14 @@ Este pacote conecta **Fallen Tactics**, **Beat Up** e a infraestrutura **MutterC
 | API | [apis/openapi.yaml](apis/openapi.yaml) |
 | Integração Fallen Tactics | [game-integrations/fallen-tactics.md](game-integrations/fallen-tactics.md) |
 | Integração Beat Up | [game-integrations/beat-up.md](game-integrations/beat-up.md) |
+| Integração Taskbar Planets | [game-integrations/taskbar-planets-forger.md](game-integrations/taskbar-planets-forger.md) |
+| Integração Forge of Champions | [game-integrations/forge-of-champions.md](game-integrations/forge-of-champions.md) |
+| Ferramentas | [tools/README.md](tools/README.md) |
 | Segurança | [architecture/03-security-governance.md](architecture/03-security-governance.md) |
 | Migração e roadmap | [roadmap/01-migration-roadmap.md](roadmap/01-migration-roadmap.md) |
 | Premissas e decisões | [ASSUMPTIONS.md](ASSUMPTIONS.md) |
+| Revisão de projetos | [../outputs/MutterGames-Project-Review.md](../outputs/MutterGames-Project-Review.md) |
+| Índice outputs | [../outputs/README.md](../outputs/README.md) |
 
 ## Gates obrigatórios
 

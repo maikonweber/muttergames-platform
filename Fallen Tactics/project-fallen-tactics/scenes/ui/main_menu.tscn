@@ -1,0 +1,108 @@
+[gd_scene load_steps=2 format=3 uid="uid://fallen_main_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.06, 0.09, 1)
+
+[node name="AccentTop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 4.0
+grow_horizontal = 2
+color = Color(0.78, 0.55, 0.22, 1)
+
+[node name="AccentBottom" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.22, 0.45, 0.78, 1)
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Root/Center"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="Root/Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 42
+theme_override_colors/font_color = Color(0.95, 0.9, 0.78, 1)
+horizontal_alignment = 1
+text = "FALLEN TACTICS"
+
+[node name="Subtitle" type="Label" parent="Root/Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.7, 0.78, 0.88, 1)
+horizontal_alignment = 1
+text = "RPG tático · deckbuilder · Região Caída"
+
+[node name="Spacer" type="Control" parent="Root/Center/VBox"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="PlayBtn" type="Button" parent="Root/Center/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Nova Run — Região Caída"
+
+[node name="CombatBtn" type="Button" parent="Root/Center/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Combate direto (treino)"
+
+[node name="PvpBtn" type="Button" parent="Root/Center/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "PVP Online"
+
+[node name="QuitBtn" type="Button" parent="Root/Center/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Sair"
+
+[node name="Status" type="Label" parent="Root/Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.55, 0.62, 0.7, 1)
+horizontal_alignment = 1
+text = "v0.1.0"
