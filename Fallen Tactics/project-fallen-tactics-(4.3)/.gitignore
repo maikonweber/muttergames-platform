@@ -1,8 +1,0 @@
-# Godot 4
-.godot/
-*.translation
-export.cfg
-export_presets.cfg
-*.tmp
-.import/
-android/

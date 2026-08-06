@@ -1,0 +1,36 @@
+[submodule "apps/api"]
+	path = apps/api
+	url = git@github.com:maikonweber/muttergames-api.git
+	branch = main
+[submodule "apps/launcher"]
+	path = apps/launcher
+	url = git@github.com:maikonweber/muttergames-launcher.git
+	branch = main
+[submodule "apps/fallen-game-server"]
+	path = apps/fallen-game-server
+	url = git@github.com:maikonweber/muttergames-fallen-game-server.git
+	branch = main
+[submodule "Beat Up"]
+	path = Beat Up
+	url = git@github.com:maikonweber/muttergames-beat-up.git
+	branch = main
+[submodule "apps/web"]
+	path = apps/web
+	url = git@github.com:maikonweber/muttergames-web.git
+	branch = main
+[submodule "Fallen Tactics"]
+	path = Fallen Tactics
+	url = git@github.com:maikonweber/muttergames-fallen-tactics.git
+	branch = main
+[submodule "ForgeOfChampions"]
+	path = ForgeOfChampions
+	url = git@github.com:maikonweber/muttergames-forge-of-champions.git
+	branch = main
+[submodule "Blockchain/MutterCoinSolana"]
+	path = Blockchain/MutterCoinSolana
+	url = git@github.com:maikonweber/muttercoin-solana.git
+	branch = main
+[submodule "TaskBarPlanetsForger"]
+	path = TaskBarPlanetsForger
+	url = git@github.com:maikonweber/muttergames-taskbar-planets-forger.git
+	branch = main
