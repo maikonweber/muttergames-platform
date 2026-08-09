@@ -8,10 +8,11 @@ Produto **Windows-first, offline por padrão**. Blockchain, marketplace e conta 
 
 | Sistema do jogo | Integração proposta (pós-MVP) |
 |---|---|
-| Idle / órbitas / forja | 100% local; progresso offline limitado |
+| Idle / **planeta único por capítulo** / forja | 100% local; progresso offline limitado |
 | Recursos (Matéria, Energia, Biomassa, …) | Soft currency off-chain; sem tokenização de poder |
-| Essência / prestígio | Entitlement ou colecionável cosmético, nunca pay-to-win |
+| Essência / prestígio / memórias | Entitlement ou colecionável cosmético, nunca pay-to-win |
 | Seeds / aparência de planetas | Metadados locais; eventual colecionável cosmético com `visual_seed` |
+| Capítulos / `display_name` | Cosmético ou badge de campanha; não afeta power |
 | Janela desktop / bandeja | Fora do escopo da API; cliente nativo |
 
 ## Assets iniciais (quando houver catálogo)
@@ -28,6 +29,7 @@ Produto **Windows-first, offline por padrão**. Blockchain, marketplace e conta 
 
 - Seed Lab: [`../tools/04-seed-lab-spec.md`](../tools/04-seed-lab-spec.md)
 - Pós-processamento de PNG: Creative Tools [`../tools/02-creative-tools-spec.md`](../tools/02-creative-tools-spec.md)
+- Arquétipos 3D/preview (offline pack): Meshy Asset [`../tools/11-meshy-asset-spec.md`](../tools/11-meshy-asset-spec.md) · `scripts/taskbar-planets-meshy-pack.sh`
 - Distribuição Windows: Launcher [`../tools/03-launcher-spec.md`](../tools/03-launcher-spec.md)
 
 ## Adaptação Godot (fase plataforma)
