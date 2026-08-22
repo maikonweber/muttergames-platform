@@ -54,11 +54,24 @@ services:
       FALLEN_GS_WS_PATH: /v1/session
       FALLEN_GS_REQUIRE_AUTH: ${FALLEN_GS_REQUIRE_AUTH:-false}
       JWT_SECRET: ${JWT_SECRET:-muttergames-dev-jwt-secret-change-me}
-      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      FALLEN_GS_DATABASE_URL: postgresql://${POSTGRES_USER:-muttergames}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-muttergames}
+      WEB_ORIGIN: ${FALLEN_GS_CORS_ORIGIN:-*}
     ports:
       - "4010:4010"
       - "9001:9001/udp"
     networks: [backend]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api/v1}
+        NEXT_PUBLIC_FALLEN_GS_URL: ${NEXT_PUBLIC_FALLEN_GS_URL:-http://localhost:4010}
+    ports: ["3310:3000"]
+    depends_on:
+      fallen-game-server:
+        condition: service_started
     restart: unless-stopped
 
   prometheus:
