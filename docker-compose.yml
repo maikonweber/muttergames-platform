@@ -27,6 +27,7 @@ services:
       WEB_ORIGIN: http://localhost:3000
       SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
       SOLANA_FEATURE_MODE: ${SOLANA_FEATURE_MODE:-tester}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-change-me-internal-service-token}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports: ["3001:3001"]
     depends_on:
@@ -54,7 +55,9 @@ services:
       FALLEN_GS_WS_PATH: /v1/session
       FALLEN_GS_REQUIRE_AUTH: ${FALLEN_GS_REQUIRE_AUTH:-false}
       JWT_SECRET: ${JWT_SECRET:-muttergames-dev-jwt-secret-change-me}
-      FALLEN_GS_DATABASE_URL: postgresql://${POSTGRES_USER:-muttergames}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-muttergames}
+      FALLEN_GS_REQUIRE_API: "true"
+      MUTTER_API_URL: http://api:3001/api/v1
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-change-me-internal-service-token}
       WEB_ORIGIN: ${FALLEN_GS_CORS_ORIGIN:-*}
     ports:
       - "4010:4010"
