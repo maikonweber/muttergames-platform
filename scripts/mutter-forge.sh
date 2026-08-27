@@ -18,6 +18,7 @@ Grupos:
   game <comando...>                       Encaminha a mutter-gamekit (dados, localização, Godot).
   ai-image <comando...>                   Encaminha a OpenRouter Image.
   ai-game <comando...>                    Encaminha OpenRouter Game (texto, briefs, TTS).
+  meshy <comando...>                      Encaminha Meshy Asset (texto/imagem → 3D).
   3d primitive <cube|sphere|cylinder> <nome> <saida.glb> [cor-hex]
   3d render <arquivo.blend> <saida.png> [frame]
   mcp init [mcp.json]                     Cria configuração de servidor MCP local.
@@ -27,6 +28,7 @@ Exemplos:
   scripts/mutter-forge.sh game component health scripts/components/health.gd
   scripts/mutter-forge.sh 3d primitive sphere planet assets/3d/planet.glb 2EAFD7
   scripts/mutter-forge.sh ai-game text --model <modelo> --kind lore --prompt "..." --out docs/lore.md
+  scripts/mutter-forge.sh meshy text-to-3d --prompt "sword" --out tmp/assets/sword --meta
 EOF
 }
 
@@ -36,6 +38,7 @@ doctor() {
     if command -v "$tool" >/dev/null 2>&1; then echo "[ok] $tool"; else echo "[--] $tool"; fi
   done
   [[ -n "${OPEN_ROUTER:-}" ]] && echo "[ok] OPEN_ROUTER configurado" || echo "[--] OPEN_ROUTER não configurado"
+  if [[ -n "${MESHY_API:-${MESHY_API_KEY:-}}" ]]; then echo "[ok] MESHY_API configurado"; else echo "[--] MESHY_API não configurado"; fi
 }
 
 primitive() {
@@ -85,6 +88,7 @@ case "$group" in
   game) bash "${ROOT_DIR}/scripts/mutter-gamekit.sh" "$@" ;;
   ai-image) bash "${ROOT_DIR}/scripts/openrouter-image.sh" "$@" ;;
   ai-game) bash "${ROOT_DIR}/scripts/openrouter-game.sh" "$@" ;;
+  meshy) bash "${ROOT_DIR}/scripts/meshy-asset.sh" "$@" ;;
   3d) command="${1:-}"; shift || true; case "$command" in primitive) primitive "$@" ;; render) render "$@" ;; *) die "3d aceita primitive ou render" ;; esac ;;
   mcp) [[ "${1:-}" == "init" ]] || die "mcp aceita init"; shift; mcp_init "$@" ;;
   help|-h|--help) usage ;;

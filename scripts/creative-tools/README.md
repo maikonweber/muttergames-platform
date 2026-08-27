@@ -20,6 +20,7 @@ scripts/mutter-creative.sh <comando>
 | Áudio | FFmpeg (`ffmpeg`) | `sfx`, `music` |
 | Brief de IA | nenhuma | `prompt` |
 | Geração de imagem (opcional) | OpenRouter + `curl`/`jq` | `scripts/openrouter-image.sh` — [guia](openrouter-image.md) · [spec](../../Ecosystem/tools/06-openrouter-image-spec.md) |
+| Geração 3D (opcional) | Meshy + `curl`/`jq` | `scripts/meshy-asset.sh` — [guia](meshy-asset.md) · [spec](../../Ecosystem/tools/11-meshy-asset-spec.md) |
 | Texto / voz (opcional) | OpenRouter | `scripts/openrouter-game.sh` — [guia](openrouter-game.md) · [spec](../../Ecosystem/tools/08-openrouter-game-spec.md) |
 | Scaffolds de jogo | Bash apenas | `scripts/mutter-gamekit.sh` — [guia](gamekit.md) · [spec](../../Ecosystem/tools/09-gamekit-spec.md) |
 
@@ -76,6 +77,8 @@ scripts/mutter-creative.sh validate assets
 - `scaffold`: gera pontos de partida Godot para HUD, pickup de recurso ou VFX de execução única.
 
 Para geração de imagem via OpenRouter, use o adaptador separado [openrouter-image.md](openrouter-image.md). Ele exige `OPEN_ROUTER` e nunca deve receber uma chave gravada em arquivo.
+
+Para geração 3D via Meshy (Text/Image → GLB), use [meshy-asset.md](meshy-asset.md). Exige `MESHY_API_KEY` (plano Pro+) e nunca deve receber a chave gravada em arquivo.
 
 Para textos de jogo, briefs de imagem/VFX/SFX/música, vozes TTS e remoção de fundo, use [openrouter-game.md](openrouter-game.md).
 

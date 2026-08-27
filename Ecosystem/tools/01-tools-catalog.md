@@ -16,7 +16,7 @@ Ferramentas usadas por engenharia, arte e QA **dentro do monorepo**. Exclui IDEs
 | TOOL-03 | Seed Lab | Cena Godot | Arte, design | `TaskBarPlanetsForger/.../seed_lab.tscn` | [04-seed-lab-spec](04-seed-lab-spec.md) | MVP |
 | TOOL-04 | Local Dev Toolchain | Scripts Bash | Eng | `scripts/init-all.sh`, `run-*.sh` | [05-local-dev-toolchain-spec](05-local-dev-toolchain-spec.md) | MVP |
 | TOOL-05 | Fallen Game Server | Serviço local/dev | Eng multiplayer | `apps/fallen-game-server` | README do app | Protótipo |
-| TOOL-06 | Meshy helper | Microserviço opcional | Arte Beat Up | `Beat Up/beat-up-/services/meshy` | README do serviço | Opcional |
+| TOOL-06 | Meshy Asset | CLI geração 3D IA | Arte, eng | `scripts/meshy-asset.sh` | [11-meshy-asset-spec](11-meshy-asset-spec.md) | Opcional (chave) |
 | TOOL-07 | Observabilidade local | Infra Compose | Eng/SRE | `infra/` + Compose | `outputs/MutterGames-SRE-Infrastructure-Guide.md` | Local only |
 | TOOL-08 | Solana sandbox scripts | CLI TS | Blockchain | `Blockchain/MutterCoinSolana/scripts` | docs do token | Sandbox |
 | TOOL-09 | OpenRouter Image | CLI geração IA | Arte, eng | `scripts/openrouter-image.sh` | [06-openrouter-image-spec](06-openrouter-image-spec.md) | Opcional (chave) |
@@ -34,7 +34,7 @@ Ferramentas usadas por engenharia, arte e QA **dentro do monorepo**. Exclui IDEs
 | TOOL-03 | Godot 4.7+ | — |
 | TOOL-04 | Node 22, pnpm 11, Docker | Solana CLI |
 | TOOL-05 | pnpm / Node | Cliente Fallen Tactics |
-| TOOL-06 | Python 3.10+ | API Meshy / chave |
+| TOOL-06 | Bash, curl, jq, base64, `MESHY_API` | Créditos Meshy (Pro+) |
 | TOOL-07 | Docker Compose | — |
 | TOOL-08 | Node/TS, Solana tooling | Rede local |
 | TOOL-09 | Bash, curl, jq, base64, `OPEN_ROUTER` | Modelos pagos OpenRouter |
@@ -52,7 +52,7 @@ Ferramentas usadas por engenharia, arte e QA **dentro do monorepo**. Exclui IDEs
 | TOOL-03 | Design Taskbar Planets | Eng Godot do jogo |
 | TOOL-04 | Eng plataforma | Eng plataforma |
 | TOOL-05 | Eng Fallen Tactics | Eng networking |
-| TOOL-06 | Arte Beat Up | Eng Beat Up |
+| TOOL-06 | Produção de arte | Eng de ferramentas |
 | TOOL-07 | SRE | Eng plataforma |
 | TOOL-08 | Blockchain | Eng Solana |
 | TOOL-09 | Produção de arte | Eng de ferramentas |

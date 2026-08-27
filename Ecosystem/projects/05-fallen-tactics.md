@@ -2,7 +2,7 @@
 
 **Pasta canônica:** `Fallen Tactics/project-fallen-tactics/`  
 **Engine:** Godot 4.7 (Forward+)  
-**Status:** Vertical slice jogável + PVP em curso  
+**Status:** Vertical slice jogável + **PVP Online 1v1** (lobby + arena + fallen-gs)  
 **Owner:** Game Director / Eng do jogo
 
 ## 1. High concept
@@ -16,7 +16,7 @@ RPG + deckbuilding + tática em grid isométrico. Cartas são escolhas (posiçã
 | Main scene | `res://scenes/ui/main_menu.tscn` |
 | Autoloads | `GameState`, `AudioBus`, `NetClient`, `MultiplayerSession` |
 | Resolução | 1280×720 |
-| Loop | Menu → zona/mapa → combate; PVP via PRJ-04 |
+| Loop | Menu → mapa de nós / combate; **PVP Online** → lobby → arena |
 | Legado | `project-fallen-tactics-(4.3)/` — não evoluir |
 
 Contexto vivo para agentes: [`docs/STATE_PROMPT.md`](../../Fallen%20Tactics/project-fallen-tactics/docs/STATE_PROMPT.md).
@@ -25,11 +25,11 @@ Contexto vivo para agentes: [`docs/STATE_PROMPT.md`](../../Fallen%20Tactics/proj
 
 | ID | Requisito | Status |
 |---|---|---|
-| FT-RF-01 | Combate tático party 3 + FOW | Implementado (VS) |
+| FT-RF-01 | Combate tático party 3 + FOW | **OK** — run: Espadachim → Companheiro → Trio; FOW |
 | FT-RF-02 | Deckbuilding com decisões espaciais | Implementado (VS) |
-| FT-RF-03 | Zona / exploração | Em evolução |
-| FT-RF-04 | PVP 1v1 autoritativo | Cliente + server protótipo |
-| FT-RF-05 | Dados em Resources (`data/`) | Pasta existe; conteúdo ainda em GDScript |
+| FT-RF-03 | Zona / exploração | Mapa de nós P2; zona grid legado mantida |
+| FT-RF-04 | PVP 1v1 autoritativo | **OK** — lobby menu + arena + `apps/fallen-game-server` |
+| FT-RF-05 | Dados em Resources/JSON (`data/`) | Catálogos JSON + libraries; combate lê `data/` |
 | FT-RF-06 | Cosméticos via MutterGames | Spec integração; SDK pendente |
 
 ## 4. Documentação local (fonte de design)

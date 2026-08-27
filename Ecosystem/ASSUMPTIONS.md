@@ -3,6 +3,7 @@
 ## Evidências encontradas
 
 - Fallen Tactics é um tactics/deckbuilder roguelike em Godot, com combate em grid, cartas, classes, equipamentos, runs e meta-progressão.
+- TaskBar Planets Forger é idle desktop Windows-first: **um planeta por capítulo** (forja → terraform → vida → civ → meteoro/rebuild → supernova + memórias); multi-órbita não é o MVP.
 - Beat Up é um jogo Godot de direção isométrica em cidade procedural, com perseguição policial, score, rádio e veículos planejados.
 - MutterCoinSolana já define SPL Token-2022, supply máximo proposto de 10 bilhões, documentação de marketplace/wallet/backend e um programa Anchor inicial de emissão.
 

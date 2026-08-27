@@ -45,3 +45,7 @@ Revisar/
 
 # Nested repo backups (preserved when flattening into monorepo)
 .git-nested-backup/
+node_modules
+.pnpm-store/
+tmp/
+tmp_*.png

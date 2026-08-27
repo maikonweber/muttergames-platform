@@ -9,7 +9,7 @@ Pacote de documentação das **ferramentas internas** do monorepo: criação de 
 ## Decisões principais
 
 - Creative Tools são CLI portáveis (Bash + ImageMagick/FFmpeg), não um editor Godot.
-- OpenRouter Image/Game são adaptadores opcionais; chaves nunca vão para o repositório.
+- OpenRouter Image/Game e Meshy Asset são adaptadores opcionais; chaves nunca vão para o repositório.
 - Game Kit gera scaffolds locais sem rede.
 - O Launcher é o único caminho suportado de instalação Windows para releases oficiais.
 - Seed Lab pertence ao Taskbar Planets Forger; a saída pode alimentar packs compartilhados via Creative Tools.
@@ -19,7 +19,7 @@ Pacote de documentação das **ferramentas internas** do monorepo: criação de 
 
 | Documento | Conteúdo |
 |---|---|
-| [01-tools-catalog.md](01-tools-catalog.md) | Inventário TOOL-01…12 |
+| [01-tools-catalog.md](01-tools-catalog.md) | Inventário TOOL-01…13 |
 | [02-creative-tools-spec.md](02-creative-tools-spec.md) | `mutter-creative.sh` |
 | [03-launcher-spec.md](03-launcher-spec.md) | Launcher Windows |
 | [04-seed-lab-spec.md](04-seed-lab-spec.md) | Seed Lab |
@@ -29,6 +29,7 @@ Pacote de documentação das **ferramentas internas** do monorepo: criação de 
 | [08-openrouter-game-spec.md](08-openrouter-game-spec.md) | OpenRouter Game (texto/voz) |
 | [09-gamekit-spec.md](09-gamekit-spec.md) | Game Kit |
 | [10-mutter-forge-spec.md](10-mutter-forge-spec.md) | CLI unificada com Blender e MCP |
+| [11-meshy-asset-spec.md](11-meshy-asset-spec.md) | Meshy Text/Image → 3D |
 
 ## Relacionados
 

@@ -19,9 +19,13 @@ scripts/mutter-forge.sh 3d render scenes/planet.blend outputs/planet.png 1
 # IA OpenRouter
 scripts/mutter-forge.sh ai-image generate --model <modelo> --prompt "..." --out assets/generated/item
 scripts/mutter-forge.sh ai-game text --model <modelo> --kind lore --prompt "..." --out docs/lore.md
+
+# 3D via Meshy API
+scripts/mutter-forge.sh meshy balance
+scripts/mutter-forge.sh meshy text-to-3d --prompt "low-poly sword" --out tmp/assets/sword --meta
 ```
 
-Defina `BLENDER_BIN` se o executável do Blender não estiver no `PATH`; para IA, configure `OPEN_ROUTER` no ambiente.
+Defina `BLENDER_BIN` se o executável do Blender não estiver no `PATH`; para IA, configure `OPEN_ROUTER` e/ou `MESHY_API_KEY` no ambiente.
 
 ## MCP local
 
