@@ -1,0 +1,13 @@
+.godot/
+export_templates/
+feature_profiles/
+text_editor_themes/
+script_templates/
+tools/_mask_review/
+tools/_debug_eyes/
+tools/_previews/
+tools/__pycache__/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
