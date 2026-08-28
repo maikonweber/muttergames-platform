@@ -19,6 +19,7 @@ var _masks: Dictionary = {}
 var _mask_bbox: Dictionary = {}
 var _face_image: Image
 var _lash_cache: Dictionary = {}
+var _texture_sync_queued: Dictionary = {}
 
 
 func load_model(next_model: ModelData) -> void:
@@ -171,65 +172,56 @@ func apply_mask_fill(category: String, color: Color, intensity: float, dilate_px
 	return painted
 
 
-func apply_lashes(cosmetic: CosmeticData) -> bool:
+func apply_lashes(
+		cosmetic: CosmeticData,
+		size_px: int = 24,
+		tint: Color = Color(0, 0, 0, 0),
+		intensity: float = -1.0
+	) -> bool:
 	var image: Image = _layers.get("mascara", null)
 	if image == null or cosmetic == null:
 		return false
 	image.fill(Color(0, 0, 0, 0))
-	var calibrated := _calibrated_lash_overlay(cosmetic.id)
-	if calibrated != null:
-		_layers["mascara"] = calibrated
-		_sync_texture("mascara")
-		layers_changed.emit()
-		return true
+	var color := tint if tint.a > 0.05 else cosmetic.color
+	var amount := intensity if intensity >= 0.0 else cosmetic.default_intensity
 	var painted := false
 	var masks: Array = _masks.get("mascara", [])
+	var size_mul := clampf(float(maxi(size_px, 8)) / 24.0, 0.45, 1.7)
 	for side in 2:
-		var piece := _lash_piece(cosmetic.atlas_index, side)
+		var piece := _lash_piece(cosmetic, side)
 		var strip: Image = piece.get("image", null)
 		if strip == null:
 			continue
 		var eye := _eye_box_for_side(side)
 		if eye.size.x < 8:
 			continue
-		var attach := int(piece.get("attach", int(strip.get_height() * 0.82)))
-		var outer_pad := int(round(float(eye.size.x) * 0.07))
+		var attach := int(piece.get("attach", int(strip.get_height() * 0.88)))
+		var outer_pad := int(round(float(eye.size.x) * 0.06))
 		var x0 := eye.position.x - (outer_pad if side == 0 else int(round(float(eye.size.x) * 0.03)))
 		var x1 := eye.end.x + (outer_pad if side == 1 else int(round(float(eye.size.x) * 0.03)))
 		var target_w := float(maxi(x1 - x0, 8))
 		var scale := target_w / float(maxi(strip.get_width(), 1))
 		var dest_w := maxi(int(round(float(strip.get_width()) * scale)), 8)
-		var dest_h := maxi(int(round(float(strip.get_height()) * scale)), 6)
+		var dest_h := maxi(int(round(float(strip.get_height()) * scale * size_mul * 0.62)), 22)
 		var scaled := strip.duplicate()
-		scaled.resize(dest_w, dest_h, Image.INTERPOLATE_LANCZOS)
-		var attach_s := float(attach) * scale
+		scaled.resize(dest_w, dest_h, Image.INTERPOLATE_CUBIC)
+		var attach_s := float(attach) * (float(dest_h) / float(maxi(strip.get_height(), 1)))
 		var dest_x := x0
-		var fallback_y := int(round(float(eye.position.y) + float(eye.size.y) * 0.40))
+		var fallback_y := int(round(float(eye.position.y) + float(eye.size.y) * 0.55))
 		var mask: Image = masks[side] if side < masks.size() else null
 		var line := _lash_line_samples(mask, dest_x, dest_w, fallback_y)
-		if _blit_lashes_along(image, scaled, dest_x, line, attach_s, cosmetic.color, cosmetic.default_intensity):
+		if _blit_lashes_along(image, scaled, dest_x, line, attach_s, color, amount):
 			painted = true
 	_sync_texture("mascara")
 	layers_changed.emit()
 	return painted
 
 
-func _calibrated_lash_overlay(cosmetic_id: String) -> Image:
-	if model == null or cosmetic_id.is_empty():
-		return null
-	var style := cosmetic_id.trim_prefix("mascara_")
-	if style == cosmetic_id:
-		return null
-	var path := "res://assets/models/%s/makeup/mascara/%s_mascara_%s_overlay_v1.png" % [model.id, model.id, style]
-	var texture := load(path) as Texture2D
-	if texture == null:
-		return null
-	var image := _as_rgba(texture.get_image())
+func layer_bbox(category: String) -> Rect2i:
+	var image: Image = _layers.get(category, null)
 	if image == null:
-		return null
-	if image.get_size() != ModelData.CANVAS_SIZE:
-		image.resize(ModelData.CANVAS_SIZE.x, ModelData.CANVAS_SIZE.y, Image.INTERPOLATE_BILINEAR)
-	return image
+		return Rect2i()
+	return _opaque_bbox(image)
 
 
 func has_paint(category: String) -> bool:
@@ -243,40 +235,48 @@ func has_paint(category: String) -> bool:
 	return false
 
 
-func _lash_piece(atlas_index: int, side: int) -> Dictionary:
-	var key := "%d:%d" % [atlas_index, side]
+func _lash_piece(cosmetic: CosmeticData, side: int) -> Dictionary:
+	var style := cosmetic.id.trim_prefix("mascara_") if cosmetic else ""
+	var key := "%s:%d" % [style, side]
 	if _lash_cache.has(key):
 		return _lash_cache[key]
 	var empty := {}
-	var sheet := load("res://assets/cosmetics/mascara/mascara_style_atlas_v1.png") as Texture2D
+	var side_name := "left" if side == 0 else "right"
+	var path := "res://assets/cosmetics/mascara/items/mascara_%s_%s_v1.png" % [style, side_name]
+	var sheet := load(path) as Texture2D
+	if sheet == null:
+		sheet = load("res://assets/cosmetics/mascara/mascara_style_atlas_v1.png") as Texture2D
 	if sheet == null:
 		return empty
 	var src := _as_rgba(sheet.get_image())
 	if src == null:
 		return empty
-	var cols := 2
-	var cell_w := int(src.get_width() / cols)
-	var cell_h := int(src.get_height() / cols)
-	var col := atlas_index % cols
-	var row := int(atlas_index / cols)
-	var cell := src.get_region(Rect2i(col * cell_w, row * cell_h, cell_w, cell_h))
-	var box := _opaque_bbox(cell)
-	if box.size.x < 8:
-		return empty
-	var gap := _pair_gap_x(cell, box)
-	var half := Rect2i(box)
-	if side == 0:
-		half.size.x = maxi(gap - box.position.x, 4)
-	else:
-		half.position.x = gap
-		half.size.x = maxi(box.end.x - gap, 4)
-	var raw := cell.get_region(half)
-	var tight := _opaque_bbox(raw)
+	var cell := src
+	if src.get_width() > 400 and src.get_height() > 400:
+		var cols := 2
+		var cell_w := int(src.get_width() / cols)
+		var cell_h := int(src.get_height() / cols)
+		var col := cosmetic.atlas_index % cols
+		var row := int(cosmetic.atlas_index / cols)
+		cell = src.get_region(Rect2i(col * cell_w, row * cell_h, cell_w, cell_h))
+		var box := _opaque_bbox(cell)
+		if box.size.x < 8:
+			return empty
+		var gap := _pair_gap_x(cell, box)
+		var half := Rect2i(box)
+		if side == 0:
+			half.size.x = maxi(gap - box.position.x, 4)
+		else:
+			half.position.x = gap
+			half.size.x = maxi(box.end.x - gap, 4)
+		cell = cell.get_region(half)
+	var tight := _opaque_bbox(cell)
 	if tight.size.x < 8 or tight.size.y < 6:
 		return empty
-	var strip := raw.get_region(tight)
-	var attach := _densest_row(strip)
-	var cut_h := mini(strip.get_height(), attach + maxi(int(round(float(strip.get_height()) * 0.08)), 6))
+	var strip := cell.get_region(tight)
+	var attach := _lash_root_row(strip)
+	var keep_below := maxi(int(round(float(strip.get_height()) * 0.05)), 4)
+	var cut_h := mini(strip.get_height(), attach + keep_below)
 	if cut_h < strip.get_height():
 		strip = strip.get_region(Rect2i(0, 0, strip.get_width(), cut_h))
 	attach = clampi(attach, 0, strip.get_height() - 1)
@@ -321,13 +321,14 @@ func _pair_gap_x(cell: Image, box: Rect2i) -> int:
 	return best_x
 
 
-func _densest_row(src: Image) -> int:
-	var best_y := int(src.get_height() * 0.5)
+func _lash_root_row(src: Image) -> int:
+	var y_start := int(float(src.get_height()) * 0.58)
+	var best_y := src.get_height() - 1
 	var best_n := -1
-	for y in src.get_height():
+	for y in range(src.get_height() - 1, y_start - 1, -1):
 		var n := 0
 		for x in src.get_width():
-			if src.get_pixel(x, y).a > 0.08:
+			if src.get_pixel(x, y).a > 0.16:
 				n += 1
 		if n > best_n:
 			best_n = n
@@ -401,22 +402,27 @@ func _blit_lashes_along(
 		intensity: float
 	) -> bool:
 	var painted := false
-	var amount := clampf(intensity + 0.12, 0.4, 1.0)
+	var amount := clampf(intensity, 0.35, 1.0)
 	for x in src.get_width():
 		if x >= line.size():
 			break
-		var dest_y := int(round(float(line[x]) - attach_s))
+		var dest_y := int(round(float(line[x]) - attach_s + 3.0))
 		for y in src.get_height():
 			var pixel := src.get_pixel(x, y)
-			if pixel.a < 0.05:
+			if pixel.a < 0.14:
 				continue
 			var dx := dest_x + x
 			var dy := dest_y + y
 			if dx < 0 or dy < 0 or dx >= dst.get_width() or dy >= dst.get_height():
 				continue
-			var luma := maxf(pixel.r, maxf(pixel.g, pixel.b))
-			var shade := clampf(0.42 + luma * 5.5, 0.38, 1.0)
-			var tinted := Color(color.r * shade, color.g * shade, color.b * shade, pixel.a * amount)
+			var fiber := clampf(pixel.a, 0.0, 1.0)
+			var lift := clampf((1.0 - fiber) * 0.22, 0.0, 0.28)
+			var tinted := Color(
+				clampf(color.r + lift, 0.0, 1.0),
+				clampf(color.g + lift, 0.0, 1.0),
+				clampf(color.b + lift, 0.0, 1.0),
+				pixel.a * amount
+			)
 			dst.set_pixel(dx, dy, _blend_over(dst.get_pixel(dx, dy), tinted, tinted.a))
 			painted = true
 	return painted
@@ -442,7 +448,7 @@ func coverage(category: String) -> float:
 	return clampf(paint_sum / mask_sum, 0.0, 1.0)
 
 
-func average_color(category: String) -> Color:
+func average_color(category: String, clip_to_mask: bool = true) -> Color:
 	var image: Image = _layers.get(category, null)
 	var masks: Array = _masks.get(category, [])
 	if image == null:
@@ -455,7 +461,7 @@ func average_color(category: String) -> Color:
 			var pixel := image.get_pixel(x, y)
 			if pixel.a <= 0.05:
 				continue
-			if not masks.is_empty() and _mask_value_at(masks, x, y) <= 0.05:
+			if clip_to_mask and not masks.is_empty() and _mask_value_at(masks, x, y) <= 0.05:
 				continue
 			rgb += Vector3(pixel.r, pixel.g, pixel.b) * pixel.a
 			weight += pixel.a
@@ -471,11 +477,11 @@ func stamp(
 		radius: int,
 		color: Color,
 		intensity: float,
-		erase: bool
+		erase: bool,
+		dilate_px: int = 0
 	) -> bool:
 	var image: Image = _layers.get(category, null)
-	var masks: Array = _masks.get(category, [])
-	if image == null or masks.is_empty() or radius <= 0:
+	if image == null or radius <= 0:
 		return false
 	var painted := false
 	var r := maxi(radius, 1)
@@ -493,12 +499,12 @@ func stamp(
 			var dist2 := dx * dx + dy * dy
 			if dist2 > r2:
 				continue
-			var mask_v := _mask_value_at(masks, x, y)
-			if mask_v <= 0.02:
+			var surface := _character_coverage(x, y, dilate_px)
+			if surface <= 0.02:
 				continue
 			var falloff := 1.0 - sqrt(dist2) / float(r)
 			falloff *= falloff * (2.0 - falloff)
-			var coverage := clampf(falloff * intensity * mask_v, 0.0, 1.0)
+			var coverage := clampf(falloff * intensity * surface, 0.0, 1.0)
 			if coverage <= 0.001:
 				continue
 			var dst := image.get_pixel(x, y)
@@ -509,8 +515,23 @@ func stamp(
 				image.set_pixel(x, y, _blend_over(dst, _shaded(color, x, y), coverage))
 			painted = true
 	if painted:
-		_sync_texture(category)
+		_queue_texture_sync(category)
 	return painted
+
+
+func _character_coverage(x: int, y: int, dilate_px: int = 0) -> float:
+	if _face_image:
+		if x >= 0 and y >= 0 and x < _face_image.get_width() and y < _face_image.get_height():
+			var alpha := _face_image.get_pixel(x, y).a
+			if alpha > 0.12:
+				return alpha
+	var face_masks: Array = _masks.get("foundation", [])
+	var value := _mask_value_at(face_masks, x, y)
+	if value > 0.02:
+		return value
+	if dilate_px > 0:
+		return _mask_tolerant(face_masks, x, y, dilate_px)
+	return 0.0
 
 
 func _sync_texture(category: String) -> void:
@@ -522,6 +543,20 @@ func _sync_texture(category: String) -> void:
 		_textures[category] = ImageTexture.create_from_image(image)
 	else:
 		tex.update(image)
+
+
+func _queue_texture_sync(category: String) -> void:
+	# Varios eventos de mouse podem chegar no mesmo frame. Um unico upload da
+	# imagem final mantem a pintura fluida e evita trabalho repetido na GPU.
+	if _texture_sync_queued.has(category):
+		return
+	_texture_sync_queued[category] = true
+	call_deferred("_flush_texture_sync", category)
+
+
+func _flush_texture_sync(category: String) -> void:
+	_texture_sync_queued.erase(category)
+	_sync_texture(category)
 
 
 func _load_masks(textures: Array[Texture2D]) -> Array[Image]:

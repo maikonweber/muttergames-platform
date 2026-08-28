@@ -10,6 +10,7 @@ var history: HistoryService
 var tools: ToolController
 var challenges: ChallengeService
 var _brief: Control
+var _last_lash_id: String = ""
 
 
 func _ready() -> void:
@@ -26,8 +27,10 @@ func _ready() -> void:
 	hud.undo_requested.connect(_on_undo)
 	hud.redo_requested.connect(_on_redo)
 	hud.complete_requested.connect(_on_complete)
+	hud.extra_pack_confirmed.connect(_on_extra_pack_confirmed)
 	result_screen.play_again.connect(_on_play_again)
 	tools.changed.connect(_on_tool_changed)
+	StoreService.purchase_finished.connect(_on_purchase_finished)
 	_load_model(GameState.selected_model_id)
 	_apply_background()
 	_show_brief()
@@ -67,9 +70,24 @@ func _start_free_play() -> void:
 
 func _load_model(model_id: String) -> void:
 	var model := ContentLibrary.get_model(model_id)
+	if model and not InventoryService.can_use_model(model):
+		model_id = "model_01"
+		GameState.select_model(model_id)
+		model = ContentLibrary.get_model(model_id)
 	session.load_model(model)
 	history.clear()
 	GameState.set_before_after(false)
+
+
+func _on_extra_pack_confirmed() -> void:
+	StoreService.purchase_extra_pack()
+
+
+func _on_purchase_finished(ok: bool, _sku: String, message: String) -> void:
+	if ok:
+		hud._refresh()
+	if hud._status:
+		hud._status.text = message
 
 
 func _apply_background() -> void:
@@ -108,14 +126,22 @@ func _on_redo() -> void:
 
 
 func _on_tool_changed() -> void:
+	if tools.is_sprite_tool():
+		var lashes := tools.current_cosmetic()
+		if lashes == null:
+			return
+		if not InventoryService.can_use_cosmetic(lashes):
+			return
+		if _last_lash_id != lashes.id:
+			history.push_snapshot(session.snapshot())
+			_last_lash_id = lashes.id
+		session.apply_lashes(lashes, tools.brush_radius, tools.current_color(), tools.intensity)
+		return
+	_last_lash_id = ""
+	if not tools.is_fill_tool():
+		return
 	var cosmetic := tools.current_cosmetic()
 	if cosmetic == null:
-		return
-	if tools.is_sprite_tool():
-		history.push_snapshot(session.snapshot())
-		session.apply_lashes(cosmetic)
-		return
-	if not tools.is_fill_tool():
 		return
 	history.push_snapshot(session.snapshot())
 	session.apply_mask_fill(cosmetic.category, cosmetic.color, tools.intensity, cosmetic.dilate_px)

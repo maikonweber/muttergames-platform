@@ -52,12 +52,14 @@ def largest_alpha(alpha: np.ndarray, floor: int) -> np.ndarray:
 def despill_hair(hair: np.ndarray) -> np.ndarray:
     rgb = hair[..., :3].astype(np.float32)
     alpha = hair[..., 3].astype(np.float32)
-    green = rgb[..., 1] - np.maximum(rgb[..., 0], rgb[..., 2])
+    max_rb = np.maximum(rgb[..., 0], rgb[..., 2])
+    spill = np.clip(rgb[..., 1] - max_rb, 0, None)
     luma = rgb.mean(axis=2)
+    # Opaque chroma leftover is the visible hairline (alpha 255 was skipped before).
+    rgb[..., 1] = np.clip(rgb[..., 1] - spill, 0, 255)
+    still = (alpha >= 8) & (rgb[..., 1] > max_rb + 1.0)
+    rgb[..., 1] = np.where(still, max_rb, rgb[..., 1])
     edge = (alpha >= 4) & (alpha < 248)
-    spill = np.clip(green, 0, None)
-    rgb[..., 1] = np.clip(rgb[..., 1] - spill * edge.astype(np.float32), 0, 255)
-    # White / studio fringe: bright edge pixels that are not interior hair.
     solid = alpha >= 200
     if solid.any():
         interior = float(np.median(luma[solid]))
@@ -65,7 +67,7 @@ def despill_hair(hair: np.ndarray) -> np.ndarray:
         rgb[pale] *= 0.42
         alpha = np.where(pale, alpha * 0.22, alpha)
     leftover = edge & (spill > 6)
-    alpha = np.where(leftover, alpha * 0.45, alpha)
+    alpha = np.where(leftover, alpha * 0.35, alpha)
     out = hair.copy()
     out[..., :3] = rgb.astype(np.uint8)
     out[..., 3] = np.clip(alpha, 0, 255).astype(np.uint8)
@@ -117,30 +119,163 @@ def recolor_from_interior(hair: np.ndarray, on: np.ndarray, ring: np.ndarray) ->
     return out
 
 
-def fix_inner_fringe(hair: np.ndarray, face: np.ndarray) -> np.ndarray:
-    alpha = hair[..., 3]
-    on = alpha >= 14
+def _hair_regions(alpha: np.ndarray, floor: int = 14) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    on = alpha >= floor
     pad = np.pad(np.where(on, 0, 1).astype(np.uint8), 1, constant_values=1)
     cv2.floodFill(pad, None, (0, 0), 2)
     flags = pad[1:-1, 1:-1]
-    hole = flags == 1
-    exterior = flags == 2
-    ring = on & cv2.dilate(hole.astype(np.uint8), np.ones((5, 5), np.uint8), iterations=1).astype(bool)
+    return on, flags == 1, flags == 2
+
+
+def fill_transparent_rgb(hair: np.ndarray) -> np.ndarray:
+    """Bleed interior hair RGB into zero-alpha pixels so bilinear sampling cannot pick chroma."""
+    out = hair.copy()
+    opaque = hair[..., 3] >= 16
+    if not opaque.any():
+        return hair
+    rgb = out[..., :3].astype(np.float32)
+    mask = opaque.astype(np.uint8)
+    kernel = np.ones((3, 3), np.uint8)
+    for _ in range(10):
+        dil = cv2.dilate(mask, kernel)
+        ring = (dil > 0) & (mask == 0)
+        if not ring.any():
+            break
+        weight = cv2.dilate(mask.astype(np.float32), kernel)
+        for c in range(3):
+            acc = cv2.dilate(rgb[..., c] * mask, kernel)
+            rgb[..., c][ring] = acc[ring] / np.maximum(weight[ring], 1.0)
+        mask = dil
+    out[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+    return out
+
+
+def fix_inner_fringe(hair: np.ndarray, face: np.ndarray) -> np.ndarray:
+    alpha = hair[..., 3]
+    on, hole, exterior = _hair_regions(alpha)
+    ring = on & cv2.dilate(
+        hole.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)), iterations=1
+    ).astype(bool)
     rgb = hair[..., :3].astype(np.float32)
     luma = rgb.mean(axis=2)
     green = rgb[..., 1] - np.maximum(rgb[..., 0], rgb[..., 2])
+    interior = on & (~ring) & (alpha >= 160)
+    interior_luma = float(np.median(luma[interior])) if interior.any() else 28.0
+    junk = ring & ((green > 3) | (np.abs(luma - interior_luma) > 22.0))
     outer = on & cv2.dilate(exterior.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=1).astype(bool)
-    outer_junk = outer & ((luma > 140) | (green > 10))
-    bad = ring | outer_junk
+    outer_junk = outer & ((green > 4) | (luma > interior_luma + 36.0))
+    bad = junk | outer_junk
     out = hair.copy()
     if bad.any():
-        bgr = cv2.cvtColor(hair, cv2.COLOR_RGBA2BGR)
+        # Recolor junk from interior first so inpaint cannot spread chroma.
+        out = recolor_from_interior(out, on, bad)
+        bgr = cv2.cvtColor(out, cv2.COLOR_RGBA2BGR)
         painted = cv2.inpaint(bgr, bad.astype(np.uint8) * 255, 5, cv2.INPAINT_TELEA)
         out[..., :3] = cv2.cvtColor(painted, cv2.COLOR_BGR2RGB)
-        luma2 = out[..., :3].astype(np.float32).mean(axis=2)
-        still_pale = ring & (luma2 > 80)
-        out[..., 3] = np.where(still_pale, (alpha.astype(np.float32) * 0.18).astype(np.uint8), alpha)
-    return recolor_from_interior(out, on, ring)
+    out = recolor_from_interior(out, on, ring)
+    rgb2 = out[..., :3].astype(np.float32)
+    max_rb = np.maximum(rgb2[..., 0], rgb2[..., 2])
+    rgb2[..., 1] = np.minimum(rgb2[..., 1], max_rb)
+    luma2 = rgb2.mean(axis=2)
+    still_pale = ring & (luma2 > interior_luma + 18.0)
+    # Let the face's own hairline show through leftover halo.
+    out[..., 3] = np.where(still_pale, (alpha.astype(np.float32) * 0.12).astype(np.uint8), alpha)
+    out[..., :3] = np.clip(rgb2, 0, 255).astype(np.uint8)
+    return out
+
+
+def close_hair_face_seam(hair: np.ndarray, face: np.ndarray) -> np.ndarray:
+    """Grow hair into the hairline crack so the studio background cannot leak through."""
+    hair_a = hair[..., 3]
+    face_a = face[..., 3]
+    hair_on = hair_a >= 24
+    face_on = face_a >= 24
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
+    grown = cv2.dilate(hair_on.astype(np.uint8), kernel, iterations=1).astype(bool)
+    near_face = cv2.dilate(face_on.astype(np.uint8), np.ones((11, 11), np.uint8)).astype(bool)
+    fill = grown & (~hair_on) & near_face
+    if not fill.any():
+        return hair
+    out = hair.copy()
+    rgb = out[..., :3].astype(np.float32)
+    mask = hair_on.astype(np.uint8)
+    weight = cv2.dilate(mask.astype(np.float32), kernel)
+    for c in range(3):
+        acc = cv2.dilate(rgb[..., c] * mask, kernel)
+        rgb[..., c][fill] = acc[fill] / np.maximum(weight[fill], 1.0)
+    max_rb = np.maximum(rgb[..., 0], rgb[..., 2])
+    rgb[..., 1] = np.minimum(rgb[..., 1], max_rb)
+    out[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+    out[..., 3] = np.where(fill, np.maximum(hair_a, 230), hair_a).astype(np.uint8)
+    return out
+
+
+def close_face_gap(face: np.ndarray, hair: np.ndarray) -> np.ndarray:
+    """Grow skin a couple of pixels into leftover holes along the hairline."""
+    face_a = face[..., 3]
+    hair_on = hair[..., 3] >= 24
+    face_on = face_a >= 24
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    grown = cv2.dilate(face_on.astype(np.uint8), kernel, iterations=1).astype(bool)
+    near_hair = cv2.dilate(hair_on.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+    fill = grown & (~face_on) & near_hair & (~hair_on)
+    if not fill.any():
+        return face
+    out = face.copy()
+    rgb = out[..., :3].astype(np.float32)
+    mask = face_on.astype(np.uint8)
+    weight = cv2.dilate(mask.astype(np.float32), kernel)
+    for c in range(3):
+        acc = cv2.dilate(rgb[..., c] * mask, kernel)
+        rgb[..., c][fill] = acc[fill] / np.maximum(weight[fill], 1.0)
+    out[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+    out[..., 3] = np.where(fill, 255, face_a).astype(np.uint8)
+    return out
+
+
+def paint_inner_hairline(hair: np.ndarray, face: np.ndarray) -> np.ndarray:
+    """Recolor the hair/face contact ring to interior hair and feather it into the skin."""
+    alpha = hair[..., 3]
+    on = alpha >= 20
+    face_on = face[..., 3] >= 80
+    if not on.any() or not face_on.any():
+        return hair
+    near_face = cv2.dilate(
+        face_on.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)), iterations=1
+    ).astype(bool)
+    hair_edge = on & cv2.dilate((~on).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))).astype(bool)
+    rgb0 = hair[..., :3].astype(np.float32)
+    olive = (
+        on
+        & near_face
+        & (rgb0[..., 1] >= rgb0[..., 0] - 18.0)
+        & (rgb0[..., 1] > rgb0[..., 2] + 16.0)
+    )
+    luma0 = rgb0.mean(axis=2)
+    interior_luma_src = on & (~near_face) & (alpha >= 180)
+    pale = np.zeros(on.shape, dtype=bool)
+    if interior_luma_src.any():
+        pale = on & near_face & (luma0 > float(np.median(luma0[interior_luma_src])) + 26.0)
+    contact = (hair_edge & near_face) | olive | pale
+    interior = on & (~contact) & (alpha >= 180)
+    if not interior.any():
+        interior = on & (~contact) & (alpha >= 80)
+    if not contact.any() or not interior.any():
+        return hair
+    out = recolor_from_interior(hair, on, contact)
+    rgb = out[..., :3].astype(np.float32)
+    median = np.median(rgb[interior], axis=0)
+    mix = contact.astype(np.float32)[..., None]
+    rgb = rgb * (1.0 - mix * 0.88) + median * (mix * 0.88)
+    max_rb = np.maximum(rgb[..., 0], rgb[..., 2])
+    rgb[..., 1] = np.minimum(rgb[..., 1], max_rb * 0.88)
+    out[..., :3] = np.clip(rgb, 0, 255).astype(np.uint8)
+    dist = cv2.distanceTransform(on.astype(np.uint8), cv2.DIST_L2, 5)
+    fade = np.clip(dist / 4.0, 0.0, 1.0)
+    a = alpha.astype(np.float32)
+    a = np.where(hair_edge & near_face, a * np.clip(0.45 + 0.55 * fade, 0.35, 1.0), a)
+    out[..., 3] = np.clip(a, 0, 255).astype(np.uint8)
+    return out
 
 
 def split_hair(hair: np.ndarray, face: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -156,10 +291,11 @@ def split_hair(hair: np.ndarray, face: np.ndarray) -> tuple[np.ndarray, np.ndarr
 
 def recover_punched_face(face: np.ndarray, hair: np.ndarray) -> np.ndarray:
     """Restore portrait pixels whose alpha was zeroed but RGB is still intact."""
-    rgb = face[..., :3]
+    rgb = face[..., :3].astype(np.float32)
     alpha = face[..., 3]
-    ghost = (alpha < 8) & (rgb.max(axis=2) > 18)
-    solid = alpha >= 80
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    magenta = (b + 8.0 >= g) & (r > 115.0) & (rgb.mean(axis=2) > 85.0) & (b > 70.0)
+    ghost = (alpha < 8) & (rgb.max(axis=2) > 18) & (~magenta)
     recover = ghost & (hair[..., 3] >= 16)
     out = face.copy()
     out[..., 3] = np.where(recover, 255, alpha)
@@ -196,9 +332,19 @@ def process_model(mid: str) -> None:
     back_path = base / f"hair/{mid}_hair_back_v1.png"
     front_path = base / f"hair/{mid}_hair_front_v1.png"
     face = load_rgba(face_path)
-    hair = fix_inner_fringe(tighten_hair(despill_hair(load_rgba(full_path))), face)
+    hair = despill_hair(load_rgba(full_path))
+    hair = tighten_hair(hair)
+    hair = fix_inner_fringe(hair, face)
+    hair = despill_hair(hair)
+    hair = fill_transparent_rgb(hair)
+    hair = close_hair_face_seam(hair, face)
+    hair = paint_inner_hairline(hair, face)
+    hair = despill_hair(hair)
+    face = close_face_gap(face, hair)
     face = clean_face_dust(recover_punched_face(face, hair), hair)
     back, front = split_hair(hair, face)
+    back = fill_transparent_rgb(despill_hair(back))
+    front = fill_transparent_rgb(despill_hair(front))
     save_rgba(full_path, hair)
     save_rgba(back_path, back)
     save_rgba(front_path, front)

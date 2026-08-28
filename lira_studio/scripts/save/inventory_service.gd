@@ -1,8 +1,10 @@
 extends Node
 
 signal coins_changed(total: int)
+signal pack_changed(owned: bool)
 
 var coins: int = 0
+var entitlements := Entitlements.new()
 
 
 func _ready() -> void:
@@ -35,6 +37,52 @@ func record_challenge(challenge_id: String, stars: int, coins_earned: int) -> vo
 	coins_changed.emit(coins)
 
 
+func owns_extra_pack() -> bool:
+	return entitlements.owns_extra_pack()
+
+
+func grant_extra_pack() -> void:
+	if entitlements.owns_extra_pack():
+		return
+	entitlements.grant(ExtraPack.SKU)
+	_persist_owned()
+	pack_changed.emit(true)
+
+
+func can_use_cosmetic(item: CosmeticData) -> bool:
+	return entitlements.can_use_cosmetic(item)
+
+
+func can_use_model(model: ModelData) -> bool:
+	return entitlements.can_use_model(model)
+
+
+func can_use_accessory(item: AccessoryData) -> bool:
+	return entitlements.can_use_accessory(item)
+
+
+func can_use_tint(swatch: Dictionary) -> bool:
+	return entitlements.can_use_tint(swatch)
+
+
 func _sync_from_save() -> void:
 	coins = int(SaveService.data.get("coins", 0))
 	coins_changed.emit(coins)
+	var before := entitlements.owns_extra_pack()
+	var raw: Variant = SaveService.data.get("owned_skus", [])
+	var skus: PackedStringArray = []
+	if typeof(raw) == TYPE_ARRAY:
+		for item in raw:
+			skus.append(String(item))
+	entitlements.set_owned(skus)
+	var after := entitlements.owns_extra_pack()
+	if before != after:
+		pack_changed.emit(after)
+
+
+func _persist_owned() -> void:
+	var listed: Array = []
+	for sku in entitlements.owned_skus():
+		listed.append(sku)
+	SaveService.data["owned_skus"] = listed
+	SaveService.save()

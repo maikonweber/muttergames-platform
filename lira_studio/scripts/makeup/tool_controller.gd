@@ -7,23 +7,27 @@ const TOOLS: Array[String] = [
 	"lipstick", "eyeshadow", "foundation", "blush",
 	"eyeliner", "mascara", "accessory", "eraser",
 ]
-const FILL_TOOLS: Array[String] = ["eyeliner"]
+const FILL_TOOLS: Array[String] = []
 const SPRITE_TOOLS: Array[String] = ["mascara"]
 
 var category: String = "lipstick"
 var cosmetic_id: String = "lipstick_ruby"
-var brush_radius: int = 12
+var brush_radius: int = 14
 var intensity: float = 0.55
 var erase: bool = false
+var color_override: Color = Color(0, 0, 0, 0)
+
+const BRUSH_MIN := 8
+const BRUSH_MAX := 120
 
 const BRUSH_FOR_TOOL := {
-	"lipstick": 11,
-	"eyeshadow": 14,
-	"foundation": 26,
-	"blush": 18,
-	"eyeliner": 8,
-	"mascara": 9,
-	"eraser": 16,
+	"lipstick": 14,
+	"eyeshadow": 20,
+	"foundation": 42,
+	"blush": 28,
+	"eyeliner": 14,
+	"mascara": 20,
+	"eraser": 24,
 }
 
 
@@ -51,12 +55,15 @@ func select_tool(tool_id: String) -> void:
 	if tool_id == "eraser":
 		erase = true
 		category = "eraser"
-		brush_radius = int(BRUSH_FOR_TOOL.get("eraser", 16))
+		color_override = Color(0, 0, 0, 0)
+		brush_radius = int(BRUSH_FOR_TOOL.get("eraser", 24))
 		changed.emit()
 		return
 	erase = false
 	category = tool_id
-	brush_radius = int(BRUSH_FOR_TOOL.get(tool_id, 12))
+	if category != "mascara" and category != "eyeliner":
+		color_override = Color(0, 0, 0, 0)
+	brush_radius = int(BRUSH_FOR_TOOL.get(tool_id, 14))
 	var items := ContentLibrary.get_cosmetics(tool_id)
 	if items.is_empty():
 		changed.emit()
@@ -82,16 +89,35 @@ func select_cosmetic(data: CosmeticData) -> void:
 	category = data.category
 	cosmetic_id = data.id
 	intensity = data.default_intensity
-	brush_radius = int(BRUSH_FOR_TOOL.get(data.category, 12))
+	if data.category != "mascara":
+		color_override = Color(0, 0, 0, 0)
+	brush_radius = int(BRUSH_FOR_TOOL.get(data.category, 14))
 	changed.emit()
 
 
+func select_tint(color: Color) -> void:
+	color_override = color
+	changed.emit()
+
+
+func max_brush_radius() -> int:
+	return BRUSH_MAX
+
+
 func set_brush_radius(value: int) -> void:
-	brush_radius = clampi(value, 6, 80)
+	var next := clampi(value, BRUSH_MIN, BRUSH_MAX)
+	if next == brush_radius:
+		return
+	brush_radius = next
+	changed.emit()
 
 
 func set_intensity(value: float) -> void:
-	intensity = clampf(value, 0.05, 1.0)
+	var next := clampf(value, 0.05, 1.0)
+	if is_equal_approx(next, intensity):
+		return
+	intensity = next
+	changed.emit()
 
 
 func current_cosmetic() -> CosmeticData:
@@ -99,6 +125,8 @@ func current_cosmetic() -> CosmeticData:
 
 
 func current_color() -> Color:
+	if color_override.a > 0.05:
+		return color_override
 	var data := current_cosmetic()
 	return data.color if data else Color.WHITE
 

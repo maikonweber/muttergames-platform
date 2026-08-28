@@ -48,6 +48,7 @@ func _blank() -> Dictionary:
 		"coins": 0,
 		"stars": {},
 		"completed": [],
+		"owned_skus": [],
 		"settings": {
 			"music": 0.7,
 			"sfx": 0.8,
@@ -65,6 +66,9 @@ func _migrate(raw: Dictionary) -> Dictionary:
 	var completed: Variant = raw.get("completed", [])
 	if typeof(completed) == TYPE_ARRAY:
 		next["completed"] = completed
+	var owned: Variant = raw.get("owned_skus", [])
+	if typeof(owned) == TYPE_ARRAY:
+		next["owned_skus"] = owned
 	var settings: Variant = raw.get("settings", {})
 	if typeof(settings) == TYPE_DICTIONARY:
 		next["settings"].merge(settings, true)

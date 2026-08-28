@@ -23,6 +23,7 @@ GameState="*res://scripts/app/game_state.gd"
 ContentLibrary="*res://scripts/data/content_library.gd"
 SaveService="*res://scripts/save/save_service.gd"
 InventoryService="*res://scripts/save/inventory_service.gd"
+StoreService="*res://scripts/store/store_service.gd"
 SettingsService="*res://scripts/save/settings_service.gd"
 
 [display]

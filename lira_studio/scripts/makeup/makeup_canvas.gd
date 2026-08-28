@@ -5,10 +5,8 @@ var session: MakeupSession
 var tools: ToolController
 var history: HistoryService
 
-var _hair_back: TextureRect
 var _face: TextureRect
 var _layers: Dictionary = {}
-var _hair_front: TextureRect
 var _debug_a: TextureRect
 var _debug_b: TextureRect
 var _acc_mid: Control
@@ -20,6 +18,8 @@ var _painting := false
 var _stroke_dirty := false
 var _stroke_before: Dictionary = {}
 var _last_pixel := Vector2i(-1, -1)
+var _pointer_pos := Vector2.ZERO
+var _pointer_visible := false
 
 
 func setup(p_session: MakeupSession, p_tools: ToolController, p_history: HistoryService) -> void:
@@ -33,15 +33,15 @@ func setup(p_session: MakeupSession, p_tools: ToolController, p_history: History
 		session.layers_changed.connect(_refresh_layers)
 		session.accessories_changed.connect(_refresh_accessories)
 	if tools:
-		tools.changed.connect(_refresh_debug)
+		tools.changed.connect(_on_tools_changed)
 	GameState.before_after_changed.connect(func(_active: bool) -> void: _refresh_layers())
 	GameState.debug_masks_changed.connect(func(_active: bool) -> void: _refresh_debug())
 	resized.connect(_refresh_accessories)
+	mouse_exited.connect(_hide_pointer)
 	_refresh_model()
 
 
 func _build() -> void:
-	_hair_back = _make_layer("HairBack")
 	_face = _make_layer("Face")
 	for category in MakeupSession.LAYER_CATEGORIES:
 		_layers[category] = _make_layer("Layer_%s" % category)
@@ -50,7 +50,6 @@ func _build() -> void:
 	_debug_a.modulate = Color(1.0, 0.25, 0.55, 0.38)
 	_debug_b.modulate = Color(0.35, 0.7, 1.0, 0.38)
 	_acc_mid = _make_anchor_layer("AccMid")
-	_hair_front = _make_layer("HairFront")
 	_acc_front = _make_anchor_layer("AccFront")
 
 
@@ -105,14 +104,90 @@ func _gui_input(event: InputEvent) -> void:
 	if session == null or tools == null:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_update_pointer(event.position)
 		if event.pressed:
 			_begin_stroke(event.position)
 		else:
 			_end_stroke()
 		accept_event()
-	elif event is InputEventMouseMotion and _painting:
-		_continue_stroke(event.position)
+	elif event is InputEventMouseMotion:
+		_update_pointer(event.position)
+		if _painting:
+			_continue_stroke(event.position)
 		accept_event()
+
+
+func _on_tools_changed() -> void:
+	_refresh_debug()
+	queue_redraw()
+
+
+func _hide_pointer() -> void:
+	_pointer_visible = false
+	queue_redraw()
+
+
+func _update_pointer(local_pos: Vector2) -> void:
+	_pointer_pos = local_pos
+	var pixel := pixel_at(local_pos)
+	_pointer_visible = pixel.x >= 0 and not tools.is_accessory_tool()
+	queue_redraw()
+
+
+func _brush_view_radius() -> float:
+	if tools == null:
+		return 10.0
+	var rect := face_rect()
+	if rect.size.x <= 1.0:
+		return 10.0
+	var scale := rect.size.x / float(ModelData.CANVAS_SIZE.x)
+	return maxf(float(tools.brush_radius) * scale, 7.0)
+
+
+func _draw() -> void:
+	if not _pointer_visible or tools == null:
+		return
+	if tools.is_accessory_tool():
+		return
+	var radius := _brush_view_radius()
+	var paint := tools.current_color()
+	var erasing := tools.erase or tools.category == "eraser"
+	if erasing:
+		paint = Color(1.0, 1.0, 1.0, 1.0)
+	var fill := paint
+	fill.a = 0.32 if not erasing else 0.12
+	draw_circle(_pointer_pos, radius, fill)
+	draw_arc(_pointer_pos, radius, 0.0, TAU, 56, Color(1, 1, 1, 0.95), 3.0, true)
+	draw_arc(_pointer_pos, radius, 0.0, TAU, 56, Color(0.28, 0.10, 0.18, 0.92), 1.5, true)
+	draw_circle(_pointer_pos, 3.5, Color(1, 1, 1, 0.95))
+	draw_circle(_pointer_pos, 2.0, paint)
+	var caption := "Apagar"
+	if not erasing:
+		var cosmetic := tools.current_cosmetic()
+		caption = cosmetic.display_name if cosmetic else "Pincel"
+	var font := ThemeDB.fallback_font
+	var font_size := 16
+	var text_size := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	var flag := Rect2(
+		_pointer_pos + Vector2(radius + 10.0, -radius - 8.0),
+		Vector2(text_size.x + 28.0, 28.0)
+	)
+	if flag.position.x + flag.size.x > size.x - 8.0:
+		flag.position.x = _pointer_pos.x - radius - 10.0 - flag.size.x
+	if flag.position.y < 8.0:
+		flag.position.y = _pointer_pos.y + radius + 8.0
+	draw_rect(flag, Color(1.0, 0.96, 0.95, 0.94), true, -1.0, true)
+	draw_rect(flag, Color(0.92, 0.72, 0.32, 0.95), false, 2.0, true)
+	draw_circle(flag.position + Vector2(12.0, 14.0), 7.0, paint)
+	draw_string(
+		font,
+		flag.position + Vector2(22.0, 20.0),
+		caption,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		font_size,
+		Color(0.42, 0.18, 0.30)
+	)
 
 
 func _begin_stroke(local_pos: Vector2) -> void:
@@ -127,7 +202,7 @@ func _begin_stroke(local_pos: Vector2) -> void:
 	_last_pixel = pixel
 	if tools.is_sprite_tool():
 		var cosmetic := tools.current_cosmetic()
-		if cosmetic and session.apply_lashes(cosmetic):
+		if cosmetic and session.apply_lashes(cosmetic, tools.brush_radius, tools.current_color(), tools.intensity):
 			_stroke_dirty = true
 		_painting = false
 		return
@@ -156,6 +231,9 @@ func _end_stroke() -> void:
 	_last_pixel = Vector2i(-1, -1)
 	if history and _stroke_dirty:
 		history.push_snapshot(_stroke_before)
+		# A textura ja foi atualizada durante o gesto. O sinal global e enviado
+		# apenas ao concluir o traco, para nao acordar a interface por pixel.
+		session.layers_changed.emit()
 	_stroke_before = {}
 
 
@@ -180,23 +258,19 @@ func _stamp(pixel: Vector2i) -> void:
 		tools.brush_radius,
 		tools.current_color(),
 		tools.intensity,
-		tools.erase or tools.category == "eraser"
+		tools.erase or tools.category == "eraser",
+		tools.brush_radius if (not tools.erase and tools.category == "eyeliner") else 0
 	)
 	if painted:
 		_stroke_dirty = true
-		session.layers_changed.emit()
 
 
 func _refresh_model() -> void:
 	var model := session.model if session else null
 	if model == null:
 		_face.texture = null
-		_hair_back.texture = null
-		_hair_front.texture = null
 		return
 	_face.texture = model.smile if _show_celebration_expression and model.smile else model.face_base
-	_hair_back.texture = model.hair_back
-	_hair_front.texture = model.hair_front
 	_refresh_layers()
 	_refresh_debug()
 	_refresh_accessories()
@@ -217,7 +291,6 @@ func _refresh_layers() -> void:
 			continue
 		rect.visible = not hide_makeup
 		rect.texture = session.layer_texture(category) if session else null
-	_refresh_accessories()
 
 
 func _refresh_accessories() -> void:

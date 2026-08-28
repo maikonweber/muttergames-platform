@@ -8,6 +8,7 @@ signal clear_requested
 signal undo_requested
 signal redo_requested
 signal complete_requested
+signal extra_pack_confirmed
 
 var session: MakeupSession
 var tools: ToolController
@@ -27,7 +28,11 @@ var _before_btn: Button
 var _undo_btn: Button
 var _redo_btn: Button
 var _complete_btn: Button
+var _pack_btn: Button
 var _tool_box: GridContainer
+var _pack_sheet: Control
+var _tools_toggle: Button
+var _tools_open := true
 
 const PINK := Color(0.95, 0.42, 0.62)
 const CREAM := Color(1.0, 0.96, 0.93)
@@ -58,12 +63,12 @@ const TOOL_ICONS := {
 }
 
 const HINTS := {
-	"lipstick": "Escolha uma cor e toque nos lábios",
-	"eyeshadow": "Escolha uma cor e toque nas pálpebras",
+	"lipstick": "Escolha uma cor e pinte o rostinho",
+	"eyeshadow": "Escolha uma cor e pinte onde quiser no olho",
 	"foundation": "Toque no rostinho para a base",
-	"blush": "Toque nas bochechas",
-	"eyeliner": "Toque perto do olho para o lápis",
-	"mascara": "Escolha um estilo de cílios",
+	"blush": "Toque nas bochechas ou onde quiser corar",
+	"eyeliner": "Pinte o traço do olho onde quiser",
+	"mascara": "Escolha o estilo, a cor e o tamanho",
 	"accessory": "Toque num enfeite para pôr ou tirar",
 	"eraser": "Toque onde quiser apagar",
 }
@@ -88,11 +93,16 @@ func setup(
 		session.accessories_changed.connect(_refresh)
 	if history:
 		history.changed.connect(_refresh_history)
+	InventoryService.pack_changed.connect(func(_owned: bool) -> void:
+		_fill_models()
+		_refresh()
+	)
 	GameState.before_after_changed.connect(func(_a: bool) -> void: _refresh())
 	GameState.play_mode_changed.connect(func(_mode: String) -> void: _refresh())
 	InventoryService.coins_changed.connect(func(_total: int) -> void: _refresh_coins())
 	resized.connect(_apply_safe_area)
 	_refresh()
+	set_tools_open(false)
 
 
 func _build() -> void:
@@ -142,14 +152,12 @@ func _build() -> void:
 
 	_intensity = _slider_row(bottom_box, "Intensidade")
 	_size = _slider_row(bottom_box, "Tamanho")
-	_intensity.get_parent().visible = false
-	_size.get_parent().visible = false
 	_intensity.min_value = 0.05
 	_intensity.max_value = 1.0
 	_intensity.step = 0.05
 	_intensity.value_changed.connect(func(v: float) -> void: tools.set_intensity(v))
-	_size.min_value = 6
-	_size.max_value = 80
+	_size.min_value = 8
+	_size.max_value = 120
 	_size.step = 1
 	_size.value_changed.connect(func(v: float) -> void: tools.set_brush_radius(int(v)))
 
@@ -163,6 +171,8 @@ func _build() -> void:
 	actions.add_child(_pill_button("Limpar", func() -> void: clear_requested.emit()))
 	actions.add_child(_pill_button("Surpresa", func() -> void: look_requested.emit()))
 	actions.add_child(_pill_button("Fundo", func() -> void: background_cycled.emit()))
+	_pack_btn = _pill_button("Pacote %s" % ExtraPack.PRICE_LABEL, _offer_extra_pack)
+	actions.add_child(_pack_btn)
 	_complete_btn = _icon_action(actions, "res://assets/ui/action_controls/action_confirm_card_v1.png", "Pronto!", func() -> void: complete_requested.emit())
 
 	_status = Label.new()
@@ -171,6 +181,15 @@ func _build() -> void:
 	_status.add_theme_color_override("font_color", INK)
 	_status.add_theme_font_size_override("font_size", 15)
 	bottom_box.add_child(_status)
+	_tools_toggle = Button.new()
+	_tools_toggle.custom_minimum_size = Vector2(250, 44)
+	_tools_toggle.pressed.connect(func() -> void: set_tools_open(not _tools_open))
+	_round_card(_tools_toggle, false)
+	_tools_toggle.add_theme_color_override("font_color", INK)
+	_tools_toggle.add_theme_font_size_override("font_size", 16)
+	_tools_toggle.z_index = 4
+	add_child(_tools_toggle)
+	_position_tools_toggle()
 
 
 func _panel(is_top: bool) -> PanelContainer:
@@ -185,7 +204,7 @@ func _panel(is_top: bool) -> PanelContainer:
 		panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 		panel.anchor_top = 1.0
 		panel.anchor_bottom = 1.0
-		panel.offset_top = -430
+		panel.offset_top = -572
 		panel.offset_bottom = 0
 	var style := StyleBoxFlat.new()
 	style.bg_color = PANEL
@@ -203,6 +222,29 @@ func _panel(is_top: bool) -> PanelContainer:
 	panel.add_theme_stylebox_override("panel", style)
 	add_child(panel)
 	return panel
+
+
+func set_tools_open(open: bool) -> void:
+	_tools_open = open
+	if _bottom:
+		_bottom.visible = open
+	if _tools_toggle:
+		_tools_toggle.text = "Ocultar ferramentas" if open else "Ferramentas"
+	_position_tools_toggle()
+
+
+func _position_tools_toggle() -> void:
+	if _tools_toggle == null:
+		return
+	_tools_toggle.anchor_left = 0.5
+	_tools_toggle.anchor_right = 0.5
+	_tools_toggle.anchor_top = 1.0
+	_tools_toggle.anchor_bottom = 1.0
+	_tools_toggle.offset_left = -125
+	_tools_toggle.offset_right = 125
+	var top := -620.0 if _tools_open else -54.0
+	_tools_toggle.offset_top = top
+	_tools_toggle.offset_bottom = top + 44.0
 
 
 func _fill_models() -> void:
@@ -225,6 +267,8 @@ func _fill_models() -> void:
 		thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		thumb.texture = model.thumb if model else null
 		button.add_child(thumb)
+		if model and not InventoryService.can_use_model(model):
+			_lock_overlay(button)
 		_model_row.add_child(button)
 
 
@@ -233,7 +277,7 @@ func _fill_tools() -> void:
 		child.queue_free()
 	for tool_id in ToolController.TOOLS:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(0, 108)
+		button.custom_minimum_size = Vector2(0, 132)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(func() -> void: tools.select_tool(tool_id))
 		button.set_meta("tool_id", tool_id)
@@ -249,7 +293,7 @@ func _fill_tools() -> void:
 		col.add_theme_constant_override("separation", 2)
 		var icon := TextureRect.new()
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		icon.custom_minimum_size = Vector2(0, 70)
+		icon.custom_minimum_size = Vector2(0, 90)
 		icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -259,7 +303,7 @@ func _fill_tools() -> void:
 		lab.text = TOOL_LABELS.get(tool_id, tool_id)
 		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lab.add_theme_color_override("font_color", INK)
-		lab.add_theme_font_size_override("font_size", 14)
+		lab.add_theme_font_size_override("font_size", 16)
 		col.add_child(lab)
 		button.add_child(col)
 		_tool_box.add_child(button)
@@ -288,6 +332,9 @@ func _fill_colors() -> void:
 			button.custom_minimum_size = Vector2(64, 64)
 			button.tooltip_text = item.display_name
 			button.pressed.connect(func() -> void:
+				if not InventoryService.can_use_accessory(item):
+					_offer_extra_pack()
+					return
 				if history:
 					history.push_snapshot(session.snapshot())
 				session.toggle_accessory(item)
@@ -306,37 +353,107 @@ func _fill_colors() -> void:
 				thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				thumb.texture = item.texture
 				button.add_child(thumb)
+			if not InventoryService.can_use_accessory(item):
+				_lock_overlay(button)
 			grid.add_child(button)
 		return
+	var wrap := VBoxContainer.new()
+	wrap.add_theme_constant_override("separation", 8)
+	wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_color_row.add_child(wrap)
+	var style_grid := GridContainer.new()
+	style_grid.columns = 8
+	style_grid.add_theme_constant_override("h_separation", 6)
+	style_grid.add_theme_constant_override("v_separation", 6)
+	wrap.add_child(style_grid)
 	for item in ContentLibrary.get_cosmetics(tools.paint_category()):
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(72, 72)
-		button.tooltip_text = item.display_name
-		button.pressed.connect(func() -> void: tools.select_cosmetic(item))
-		var selected := item.id == tools.cosmetic_id
-		_round_card(button, selected)
-		if item.thumbnail:
-			var thumb := TextureRect.new()
-			thumb.set_anchors_preset(Control.PRESET_FULL_RECT)
-			thumb.offset_left = 4
-			thumb.offset_top = 4
-			thumb.offset_right = -4
-			thumb.offset_bottom = -4
-			thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			thumb.texture = item.thumbnail
-			button.add_child(thumb)
-		else:
-			var style := StyleBoxFlat.new()
-			style.bg_color = item.color
-			style.set_corner_radius_all(32)
-			style.set_border_width_all(3 if selected else 2)
-			style.border_color = GOLD if selected else Color(1, 1, 1, 0.7)
-			button.add_theme_stylebox_override("normal", style)
-			button.add_theme_stylebox_override("hover", style)
-			button.add_theme_stylebox_override("pressed", style)
-		_color_row.add_child(button)
+		style_grid.add_child(_cosmetic_button(item))
+	var tints := ContentLibrary.tint_swatches(tools.paint_category())
+	if tints.is_empty():
+		return
+	var tint_row := HBoxContainer.new()
+	tint_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	tint_row.add_theme_constant_override("separation", 6)
+	wrap.add_child(tint_row)
+	for swatch in tints:
+		tint_row.add_child(_tint_button(swatch))
+
+
+func _cosmetic_button(item: CosmeticData) -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(56, 56)
+	button.tooltip_text = item.display_name
+	button.pressed.connect(func() -> void:
+		if not InventoryService.can_use_cosmetic(item):
+			_offer_extra_pack()
+			return
+		tools.select_cosmetic(item)
+	)
+	var selected := item.id == tools.cosmetic_id
+	_round_card(button, selected)
+	if item.thumbnail and item.category in ["mascara", "accessory"]:
+		var thumb := TextureRect.new()
+		thumb.set_anchors_preset(Control.PRESET_FULL_RECT)
+		thumb.offset_left = 4
+		thumb.offset_top = 4
+		thumb.offset_right = -4
+		thumb.offset_bottom = -4
+		thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		thumb.texture = item.thumbnail
+		button.add_child(thumb)
+	else:
+		var style := StyleBoxFlat.new()
+		style.bg_color = item.color
+		style.set_corner_radius_all(28)
+		style.set_border_width_all(3 if selected else 2)
+		style.border_color = GOLD if selected else Color(1, 1, 1, 0.7)
+		button.add_theme_stylebox_override("normal", style)
+		button.add_theme_stylebox_override("hover", style)
+		button.add_theme_stylebox_override("pressed", style)
+	if not InventoryService.can_use_cosmetic(item):
+		_lock_overlay(button)
+	return button
+
+
+func _tint_button(swatch: Dictionary) -> Button:
+	var color: Color = swatch["color"]
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(40, 40)
+	button.tooltip_text = String(swatch.get("display_name", ""))
+	button.pressed.connect(func() -> void:
+		if not InventoryService.can_use_tint(swatch):
+			_offer_extra_pack()
+			return
+		tools.select_tint(color)
+	)
+	var selected := tools.color_override.is_equal_approx(color)
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(20)
+	style.set_border_width_all(3 if selected else 2)
+	style.border_color = GOLD if selected else Color(1, 1, 1, 0.75)
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_stylebox_override("hover", style)
+	button.add_theme_stylebox_override("pressed", style)
+	if not InventoryService.can_use_tint(swatch):
+		_lock_overlay(button)
+	return button
+
+
+func _sync_sliders() -> void:
+	var show := tools != null and not tools.is_accessory_tool()
+	if _intensity:
+		_intensity.get_parent().visible = show
+		_intensity.set_block_signals(true)
+		_intensity.value = tools.intensity if tools else 0.55
+		_intensity.set_block_signals(false)
+	if _size:
+		_size.get_parent().visible = show
+		_size.set_block_signals(true)
+		_size.value = float(tools.brush_radius) if tools else 14.0
+		_size.set_block_signals(false)
 
 
 func _slider_row(parent: Control, caption: String) -> HSlider:
@@ -403,7 +520,91 @@ func _round_card(button: Button, active: bool) -> void:
 	button.add_theme_color_override("font_color", INK)
 
 
+func _lock_overlay(button: Button) -> void:
+	var dim := ColorRect.new()
+	dim.color = Color(0.28, 0.10, 0.18, 0.48)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(dim)
+	var tag := Label.new()
+	tag.text = ExtraPack.PRICE_LABEL
+	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	tag.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tag.add_theme_color_override("font_color", Color.WHITE)
+	tag.add_theme_font_size_override("font_size", 11)
+	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(tag)
+
+
+func _offer_extra_pack() -> void:
+	if InventoryService.owns_extra_pack():
+		return
+	if _pack_sheet and is_instance_valid(_pack_sheet):
+		return
+	_pack_sheet = ColorRect.new()
+	_pack_sheet.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_pack_sheet.color = Color(0.25, 0.08, 0.16, 0.55)
+	_pack_sheet.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_pack_sheet)
+	var card := PanelContainer.new()
+	card.set_anchors_preset(Control.PRESET_CENTER)
+	card.offset_left = -280
+	card.offset_right = 280
+	card.offset_top = -220
+	card.offset_bottom = 220
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(1.0, 0.96, 0.95, 0.98)
+	style.border_color = GOLD
+	style.set_border_width_all(4)
+	style.set_corner_radius_all(24)
+	style.set_content_margin_all(20)
+	card.add_theme_stylebox_override("panel", style)
+	_pack_sheet.add_child(card)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	card.add_child(box)
+	var title := Label.new()
+	title.text = ExtraPack.TITLE
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", INK)
+	box.add_child(title)
+	var body := Label.new()
+	body.text = ExtraPack.BLURB
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_theme_font_size_override("font_size", 16)
+	body.add_theme_color_override("font_color", INK)
+	box.add_child(body)
+	var price := Label.new()
+	price.text = ExtraPack.PRICE_LABEL
+	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price.add_theme_font_size_override("font_size", 22)
+	price.add_theme_color_override("font_color", Color(0.72, 0.48, 0.12))
+	box.add_child(price)
+	var actions := HBoxContainer.new()
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 16)
+	box.add_child(actions)
+	actions.add_child(_pill_button("Agora não", _close_pack_sheet))
+	actions.add_child(_pill_button("Continuar", func() -> void:
+		_close_pack_sheet()
+		extra_pack_confirmed.emit()
+	))
+
+
+func _close_pack_sheet() -> void:
+	if _pack_sheet and is_instance_valid(_pack_sheet):
+		_pack_sheet.queue_free()
+	_pack_sheet = null
+
+
 func _on_model_pressed(model_id: String) -> void:
+	var model := ContentLibrary.get_model(model_id)
+	if model and not InventoryService.can_use_model(model):
+		_offer_extra_pack()
+		return
 	GameState.select_model(model_id)
 	model_selected.emit(model_id)
 
@@ -416,6 +617,7 @@ func _refresh() -> void:
 			var tool_id := String(child.get_meta("tool_id", ""))
 			_round_card(child, tool_id == tools.category)
 	_fill_colors()
+	_sync_sliders()
 	_round_card(_before_btn, GameState.before_after)
 	var cosmetic := tools.current_cosmetic()
 	var hint := String(HINTS.get(tools.category, "Toque no rostinho"))
@@ -434,6 +636,8 @@ func _refresh() -> void:
 	_refresh_history()
 	_refresh_coins()
 	_highlight_models()
+	if _pack_btn:
+		_pack_btn.visible = not InventoryService.owns_extra_pack()
 	if _complete_btn:
 		_complete_btn.visible = not GameState.is_free_play()
 
@@ -486,7 +690,7 @@ func _apply_safe_area() -> void:
 		_bottom.offset_left = margins.x
 		_bottom.offset_right = -margins.z
 		_bottom.offset_bottom = -margins.w
-		_bottom.offset_top = -440.0 - margins.w
+		_bottom.offset_top = -530.0 - margins.w
 
 
 func _safe_margins() -> Vector4:
