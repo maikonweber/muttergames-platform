@@ -1,0 +1,649 @@
+{
+  "episode": "EP01",
+  "title": "O fio vermelho",
+  "start": "EP01_SC01_N001",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "EP01_SC01_N001",
+      "speaker": "narrator",
+      "text": "O ônibus desce a serra. O mar aparece de lado, cinza e largo, como se Miralume tivesse ensaiado essa primeira impressão.",
+      "expression": "idle",
+      "location": "loc_terminal",
+      "music": "mus_arrival",
+      "effects": [{ "type": "evidence", "id": "ev_colar_protagonista" }],
+      "next": "EP01_SC01_N002",
+      "tags": ["pt-BR", "ep01"]
+    },
+    {
+      "id": "EP01_SC01_N002",
+      "speaker": "narrator",
+      "text": "O colar da mãe bate no peito quando {name} desce o último degrau. Não é joia de festa. É peso.",
+      "location": "loc_terminal",
+      "music": "mus_arrival",
+      "next": "EP01_SC01_N003"
+    },
+    {
+      "id": "EP01_SC01_N003",
+      "speaker": "narrator",
+      "text": "O celular vibra. A mãe escreveu: sorte no primeiro dia. Não perguntou se {name} está com medo. Talvez porque já saiba.",
+      "location": "loc_terminal",
+      "next": "EP01_SC01_N004"
+    },
+    {
+      "id": "EP01_SC01_N004",
+      "speaker": "narrator",
+      "text": "O vento traz maresia e um cheiro de diesel. A universidade espera no alto. A vida nova também.",
+      "location": "loc_terminal",
+      "choices": [
+        {
+          "id": "EP01_SC01_C01",
+          "text": "Respira fundo. Vai ser bom. Tem que ser.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_posture_open", "value": true },
+            { "type": "profile", "stat": "empathy", "delta": 1 }
+          ],
+          "next": "EP01_SC01_N010"
+        },
+        {
+          "id": "EP01_SC01_C02",
+          "text": "Não promete nada a si mesma. Só observa.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_posture_guarded", "value": true },
+            { "type": "profile", "stat": "reason", "delta": 1 }
+          ],
+          "next": "EP01_SC01_N010"
+        },
+        {
+          "id": "EP01_SC01_C03",
+          "text": "Sorri para o mar, de desafio. Que venha.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_posture_defiant", "value": true },
+            { "type": "profile", "stat": "daring", "delta": 1 },
+            { "type": "courage", "delta": 1 }
+          ],
+          "next": "EP01_SC01_N010"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC01_N010",
+      "speaker": "narrator",
+      "text": "O ônibus da universidade sobe. Aurora está escrita no letreiro como se fosse um destino, não um campus.",
+      "location": "loc_terminal",
+      "next": "EP01_SC02_N001"
+    },
+    {
+      "id": "EP01_SC02_N001",
+      "speaker": "narrator",
+      "text": "O pátio é pedra velha e gente nova. {name} desvia de uma mala e acerta outra coisa: um estojo de guitarra, um corpo, um calor.",
+      "location": "loc_patio",
+      "music": "amb_campus",
+      "next": "EP01_SC02_N002"
+    },
+    {
+      "id": "EP01_SC02_N002",
+      "speaker": "theo",
+      "expression": "surprise",
+      "text": "Olha, se isso for um teste de gravidade, eu passei. O chão que se dane.",
+      "location": "loc_patio",
+      "next": "EP01_SC02_N003"
+    },
+    {
+      "id": "EP01_SC02_N003",
+      "speaker": "narrator",
+      "text": "O toque ainda está no pulso quando o mundo estreita. Um fio vermelho, vivo, pulsa entre {name} e o músico. Não é metáfora. É luz.",
+      "location": "loc_patio",
+      "effects": [
+        { "type": "flag", "flag": "ep01_saw_red_thread", "value": true },
+        { "type": "cg", "id": "cg_ep01_fio_vermelho" }
+      ],
+      "next": "EP01_SC02_N004"
+    },
+    {
+      "id": "EP01_SC02_N004",
+      "speaker": "narrator",
+      "text": "Você viu uma ligação. Cor não é destino. Vermelho pode ser atração — ou o começo de um corte.",
+      "location": "loc_patio",
+      "tags": ["tutorial", "threads"],
+      "next": "EP01_SC02_N005"
+    },
+    {
+      "id": "EP01_SC02_N005",
+      "speaker": "theo",
+      "expression": "idle",
+      "text": "Você está bem? Porque eu estou com cara de quem derrubou o semestre inteiro. Theo. Sem o estojo eu sou só… Theo.",
+      "location": "loc_patio",
+      "choices": [
+        {
+          "id": "EP01_SC02_C01",
+          "text": "Ajudar a juntar as partituras.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_helped_theo", "value": true },
+            { "type": "affinity", "who": "theo", "delta": 6 },
+            { "type": "trust", "who": "theo", "delta": 2 }
+          ],
+          "next": "EP01_SC02_N010"
+        },
+        {
+          "id": "EP01_SC02_C02",
+          "text": "Confrontar: olha por onde anda.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_confronted_theo", "value": true },
+            { "type": "affinity", "who": "theo", "delta": 2 },
+            { "type": "profile", "stat": "daring", "delta": 1 }
+          ],
+          "next": "EP01_SC02_N011"
+        },
+        {
+          "id": "EP01_SC02_C03",
+          "text": "Brincar: gravidade 1, a gente 0.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_played_theo", "value": true },
+            { "type": "affinity", "who": "theo", "delta": 5 }
+          ],
+          "next": "EP01_SC02_N012"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC02_N010",
+      "speaker": "theo",
+      "expression": "smile",
+      "text": "Pessoas boas ainda existem. Ou você quer um favor. Eu aceito os dois.",
+      "location": "loc_patio",
+      "next": "EP01_SC02_N020"
+    },
+    {
+      "id": "EP01_SC02_N011",
+      "speaker": "theo",
+      "expression": "smile",
+      "text": "Justo. Eu olho para o chão agora. E para você. Não nessa ordem se você mandar.",
+      "location": "loc_patio",
+      "next": "EP01_SC02_N020"
+    },
+    {
+      "id": "EP01_SC02_N012",
+      "speaker": "theo",
+      "expression": "blush",
+      "text": "Ok. Você ganhou a primeira música do dia e eu ainda não toquei nada. Isso é talento.",
+      "location": "loc_patio",
+      "next": "EP01_SC02_N020"
+    },
+    {
+      "id": "EP01_SC02_N020",
+      "speaker": "narrator",
+      "text": "O fio some quando um grupo atravessa o pátio. Theo aponta a secretaria: “Se a bolsa mentir, não é você. É o sistema.” Ele some no sentido contrário à música.",
+      "location": "loc_patio",
+      "next": "EP01_SC03_N001"
+    },
+    {
+      "id": "EP01_SC03_N001",
+      "speaker": "narrator",
+      "text": "A secretaria cheira a papel quente. Na tela, o nome da mãe aparece onde deveria estar só o de {name} — um campo, uma herança, um erro.",
+      "location": "loc_secretaria",
+      "next": "EP01_SC03_N002"
+    },
+    {
+      "id": "EP01_SC03_N002",
+      "speaker": "narrator",
+      "text": "A atendente fala sem olhar: bolsa confirmada, próximo. O cursor pisca no sobrenome que não é o da matrícula.",
+      "location": "loc_secretaria",
+      "choices": [
+        {
+          "id": "EP01_SC03_C01",
+          "text": "Questionar a inconsistência.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_questioned_grant", "value": true },
+            { "type": "evidence", "id": "ev_bolsa_inconsistente" },
+            { "type": "profile", "stat": "reason", "delta": 1 }
+          ],
+          "next": "EP01_SC03_N010"
+        },
+        {
+          "id": "EP01_SC03_C02",
+          "text": "Observar em silêncio e guardar.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_watched_grant", "value": true },
+            { "type": "profile", "stat": "empathy", "delta": 1 }
+          ],
+          "next": "EP01_SC03_N011"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC03_N010",
+      "speaker": "narrator",
+      "text": "A atendente encolhe os ombros: “Às vezes o sistema herda nomes.” Não é resposta. É uma pista que cabe no bolso.",
+      "location": "loc_secretaria",
+      "next": "EP01_SC03_N020"
+    },
+    {
+      "id": "EP01_SC03_N011",
+      "speaker": "narrator",
+      "text": "{name} não corrige a tela. O erro continua existindo — só não tem testemunha oficial. Ainda.",
+      "location": "loc_secretaria",
+      "next": "EP01_SC03_N020"
+    },
+    {
+      "id": "EP01_SC03_N020",
+      "speaker": "helena",
+      "expression": "idle",
+      "text": "Sua mãe era persistente. Isso não é sempre uma virtude em arquivo público.",
+      "location": "loc_secretaria",
+      "conditions": [],
+      "next": "EP01_SC03_N021"
+    },
+    {
+      "id": "EP01_SC03_N021",
+      "speaker": "narrator",
+      "text": "Helena Vidal passa como quem já assinou o dia. Não espera resposta. O dormitório está no mapa, com um nome ao lado: Bia Nogueira.",
+      "location": "loc_secretaria",
+      "next": "EP01_SC04_N001"
+    },
+    {
+      "id": "EP01_SC04_N001",
+      "speaker": "bia",
+      "expression": "smile",
+      "text": "Regra um: a cama da janela é sua. Regra dois: se uma reitora aparecer, a gente finge que estuda. Eu sou a Bia. Você é a pessoa nova que vai sobreviver à festa. Combinado?",
+      "location": "loc_dorm_bia",
+      "next": "EP01_SC04_N002"
+    },
+    {
+      "id": "EP01_SC04_N002",
+      "speaker": "bia",
+      "expression": "idle",
+      "text": "Tem recepção hoje. Não é opcional. É política de corredor. Escolhe uma pele para o mundo ver — eu fico com a verdade depois, se você deixar.",
+      "location": "loc_dorm_bia",
+      "choices": [
+        {
+          "id": "EP01_SC04_C01",
+          "text": "Casual. Quero passar.",
+          "effects": [{ "type": "wardrobe_tag", "tag": "casual" }],
+          "next": "EP01_SC04_N010"
+        },
+        {
+          "id": "EP01_SC04_C02",
+          "text": "Formal. Quero parecer que pertenço.",
+          "effects": [{ "type": "wardrobe_tag", "tag": "formal" }],
+          "next": "EP01_SC04_N010"
+        },
+        {
+          "id": "EP01_SC04_C03",
+          "text": "Criativo. Quero ser vista.",
+          "effects": [{ "type": "wardrobe_tag", "tag": "creative" }],
+          "next": "EP01_SC04_N010"
+        },
+        {
+          "id": "EP01_SC04_C04",
+          "text": "Ousado. Que notem.",
+          "effects": [{ "type": "wardrobe_tag", "tag": "bold" }],
+          "next": "EP01_SC04_N010"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC04_N010",
+      "speaker": "bia",
+      "expression": "smile",
+      "text": "Gosto. Agora a pergunta chata: você vai me contar as coisas, ou eu sou só a cama da esquerda?",
+      "location": "loc_dorm_bia",
+      "choices": [
+        {
+          "id": "EP01_SC04_C05",
+          "text": "Confiar. Contar que o dia já foi estranho.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_confided_bia", "value": true },
+            { "type": "affinity", "who": "bia", "delta": 6 },
+            { "type": "trust", "who": "bia", "delta": 5 }
+          ],
+          "next": "EP01_SC04_N020"
+        },
+        {
+          "id": "EP01_SC04_C06",
+          "text": "Sorrir. Ainda não.",
+          "effects": [{ "type": "affinity", "who": "bia", "delta": 2 }],
+          "next": "EP01_SC04_N021"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC04_N020",
+      "speaker": "bia",
+      "expression": "serious",
+      "text": "Estranho eu aguento. Perigoso a gente divide. Vamos. Se o universo mandou fio, a gente manda lanche depois.",
+      "location": "loc_dorm_bia",
+      "next": "EP01_SC05_N001"
+    },
+    {
+      "id": "EP01_SC04_N021",
+      "speaker": "bia",
+      "expression": "smile",
+      "text": "Tudo bem. Eu sou boa em esperar. Péssima em fingir que não estou curiosa. Vamos à festa.",
+      "location": "loc_dorm_bia",
+      "next": "EP01_SC05_N001"
+    },
+    {
+      "id": "EP01_SC05_N001",
+      "speaker": "narrator",
+      "text": "Lanternas. Música alta demais para quem acabou de chegar. O salão da recepção mistura perfume, suor e o brilho de quem ainda não escolheu com quem errar.",
+      "location": "loc_festa",
+      "music": "amb_party",
+      "next": "EP01_SC05_N002"
+    },
+    {
+      "id": "EP01_SC05_N002",
+      "speaker": "caio",
+      "expression": "idle",
+      "text": "Você chegou ontem e já tem cara de fonte. Relaxa: isso foi um elogio ruim. Caio. Jornal do campus. Se a reitora sorrir, eu escrevo o contrário.",
+      "location": "loc_festa",
+      "next": "EP01_SC05_N003"
+    },
+    {
+      "id": "EP01_SC05_N003",
+      "speaker": "narrator",
+      "text": "Theo acena de um canto com o estojo. Gael fala com uma lista. Noah está longe demais da caixa de som. Luna aponta uma câmera para as lanternas, não para as pessoas — quase.",
+      "location": "loc_festa",
+      "choices": [
+        {
+          "id": "EP01_SC05_C01",
+          "text": "Passar o tempo com Theo.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_festa_theo", "value": true },
+            { "type": "affinity", "who": "theo", "delta": 8 },
+            { "type": "cg", "id": "cg_ep01_festa_rota" }
+          ],
+          "next": "EP01_SC05_N010"
+        },
+        {
+          "id": "EP01_SC05_C02",
+          "text": "Passar o tempo com Gael.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_festa_gael", "value": true },
+            { "type": "affinity", "who": "gael", "delta": 8 },
+            { "type": "cg", "id": "cg_ep01_festa_rota" }
+          ],
+          "next": "EP01_SC05_N020"
+        },
+        {
+          "id": "EP01_SC05_C03",
+          "text": "Passar o tempo com Noah.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_festa_noah", "value": true },
+            { "type": "affinity", "who": "noah", "delta": 8 },
+            { "type": "cg", "id": "cg_ep01_festa_rota" }
+          ],
+          "next": "EP01_SC05_N030"
+        },
+        {
+          "id": "EP01_SC05_C04",
+          "text": "Passar o tempo com Luna.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_festa_luna", "value": true },
+            { "type": "affinity", "who": "luna", "delta": 8 },
+            { "type": "cg", "id": "cg_ep01_festa_rota" }
+          ],
+          "next": "EP01_SC05_N040"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC05_N010",
+      "speaker": "theo",
+      "expression": "smile",
+      "text": "Você não precisa me salvar da festa. Mas não vai embora ainda. Tem uma música que só funciona se alguém estiver ouvindo de verdade.",
+      "location": "loc_festa",
+      "next": "EP01_SC05_N011"
+    },
+    {
+      "id": "EP01_SC05_N011",
+      "speaker": "theo",
+      "expression": "serious",
+      "text": "Tinha uma menina que filmava o ensaio, uns dois anos atrás. Eu achava que era fã. Depois ela parou de aparecer. Eu não perguntei o nome. Isso ainda me irrita.",
+      "location": "loc_festa",
+      "next": "EP01_SC06_N001"
+    },
+    {
+      "id": "EP01_SC05_N020",
+      "speaker": "gael",
+      "expression": "smile",
+      "text": "Bem-vinda a Aurora. Se o mapa mentir, a culpa é da sinalização, não sua. Eu sou o Gael. Se precisar de um caminho que não queime ninguém, eu conheço dois. O terceiro eu não indico.",
+      "location": "loc_festa",
+      "next": "EP01_SC05_N021"
+    },
+    {
+      "id": "EP01_SC05_N021",
+      "speaker": "gael",
+      "expression": "serious",
+      "text": "Íris Valença não é assunto de festa. É arquivo. Arquivo se pede. Não se espalha.",
+      "location": "loc_festa",
+      "next": "EP01_SC06_N001"
+    },
+    {
+      "id": "EP01_SC05_N030",
+      "speaker": "noah",
+      "expression": "idle",
+      "text": "Se você também está calculando a saída, a estatística está a nosso favor. Noah. Eu faço sistemas. Eles não fazem a gente, por mais que eu queira.",
+      "location": "loc_festa",
+      "next": "EP01_SC05_N031"
+    },
+    {
+      "id": "EP01_SC05_N031",
+      "speaker": "noah",
+      "expression": "think",
+      "text": "Tem um app que prevê encontros. Não é mágica. É enviesado. Que é pior. Um dia eu te mostro. Não hoje. Hoje é barulho.",
+      "location": "loc_festa",
+      "next": "EP01_SC06_N001"
+    },
+    {
+      "id": "EP01_SC05_N040",
+      "speaker": "luna",
+      "expression": "smile",
+      "text": "Sorri não. Olha para o lado. A lanterna pegou o seu colar. …Posso? Já cliquei. Desculpa.",
+      "location": "loc_festa",
+      "next": "EP01_SC05_N041"
+    },
+    {
+      "id": "EP01_SC05_N041",
+      "speaker": "luna",
+      "expression": "serious",
+      "text": "Íris não é lenda. Lenda não deixa negativo no químico. Se você for embora agora, eu entendo. Se ficar, eu mostro um corredor que o mapa esqueceu.",
+      "location": "loc_festa",
+      "next": "EP01_SC06_N001"
+    },
+    {
+      "id": "EP01_SC06_N001",
+      "speaker": "narrator",
+      "text": "O corredor antigo é mais frio do que o salão. O som da festa vira rumor. Na parede, uma vitrine de fotos de turmas. Uma delas está torta.",
+      "location": "loc_corredor_old",
+      "music": "mus_theme",
+      "tags": ["critical"],
+      "next": "EP01_SC06_N002"
+    },
+    {
+      "id": "EP01_SC06_N002",
+      "speaker": "narrator",
+      "text": "Íris Valença sorri para fora do quadro. No pescoço, o mesmo colar. Não parecido. O mesmo.",
+      "location": "loc_corredor_old",
+      "effects": [
+        { "type": "flag", "flag": "ep01_viu_foto_iris", "value": true },
+        { "type": "evidence", "id": "ev_colar_iris" },
+        { "type": "cg", "id": "cg_ep01_foto_iris" }
+      ],
+      "next": "EP01_SC06_N003"
+    },
+    {
+      "id": "EP01_SC06_N003",
+      "speaker": "narrator",
+      "text": "Alguém se move no fim do corredor. A festa ainda chama. A foto também.",
+      "location": "loc_corredor_old",
+      "choices": [
+        {
+          "id": "EP01_SC06_C01",
+          "text": "Mostrar a foto para quem passou a festa com você.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_showed_photo", "value": true },
+            { "type": "trust", "who": "festa", "delta": 6 }
+          ],
+          "tags": ["critical"],
+          "next": "EP01_SC06_N010"
+        },
+        {
+          "id": "EP01_SC06_C02",
+          "text": "Esconder. Ainda não.",
+          "effects": [{ "type": "flag", "flag": "ep01_hid_photo", "value": true }],
+          "tags": ["critical"],
+          "next": "EP01_SC06_N011"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC06_N010",
+      "speaker": "narrator",
+      "text": "A verdade pesa menos quando tem testemunha. A testemunha, porém, também passa a ter o colar na memória.",
+      "location": "loc_corredor_old",
+      "next": "EP01_SC07_N001"
+    },
+    {
+      "id": "EP01_SC06_N011",
+      "speaker": "narrator",
+      "text": "{name} endireita o quadro e finge que foi só poeira. O colar no peito continua quente.",
+      "location": "loc_corredor_old",
+      "next": "EP01_SC07_N001"
+    },
+    {
+      "id": "EP01_SC07_N001",
+      "speaker": "narrator",
+      "text": "O quarto está escuro demais para o primeiro dia. Bia deixou a luz do corredor. O celular acende sozinho.",
+      "location": "loc_quarto",
+      "next": "EP01_SC07_N002"
+    },
+    {
+      "id": "EP01_SC07_N002",
+      "speaker": "narrator",
+      "text": "Número desconhecido. Uma linha: Se você começou a enxergar os fios, já está em perigo.",
+      "location": "loc_quarto",
+      "effects": [{ "type": "evidence", "id": "ev_msg_ameaca" }],
+      "tags": ["critical"],
+      "next": "EP01_SC07_N003"
+    },
+    {
+      "id": "EP01_SC07_N003",
+      "speaker": "bia",
+      "expression": "serious",
+      "text": "Isso não é brincadeira de caloura. Você quer que eu fique acordada com você? Porque eu fico.",
+      "location": "loc_quarto",
+      "conditions": [{ "type": "flag", "flag": "ep01_confided_bia", "value": true }],
+      "next": "EP01_SC07_N004"
+    },
+    {
+      "id": "EP01_SC07_N004",
+      "speaker": "narrator",
+      "text": "A mensagem não some. O número também não.",
+      "location": "loc_quarto",
+      "choices": [
+        {
+          "id": "EP01_SC07_C01",
+          "text": "Responder: quem é você?",
+          "effects": [{ "type": "flag", "flag": "ep01_replied_threat", "value": true }],
+          "tags": ["critical"],
+          "next": "EP01_SC07_N010"
+        },
+        {
+          "id": "EP01_SC07_C02",
+          "text": "Bloquear o número.",
+          "effects": [{ "type": "flag", "flag": "ep01_blocked_number", "value": true }],
+          "tags": ["critical"],
+          "next": "EP01_SC07_N011"
+        },
+        {
+          "id": "EP01_SC07_C03",
+          "text": "Investigar o número — agora.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_traced_number", "value": true },
+            { "type": "courage", "delta": 1 }
+          ],
+          "tags": ["critical"],
+          "next": "EP01_SC07_N012"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC07_N010",
+      "speaker": "narrator",
+      "text": "Três pontinhos. Depois: Não pergunte no escuro. Amanhã o campus é menor.",
+      "location": "loc_quarto",
+      "next": "EP01_SC07_N020"
+    },
+    {
+      "id": "EP01_SC07_N011",
+      "speaker": "narrator",
+      "text": "O número some da lista. A frase não some da cabeça. Alguém já sabe o que {name} viu.",
+      "location": "loc_quarto",
+      "next": "EP01_SC07_N020"
+    },
+    {
+      "id": "EP01_SC07_N012",
+      "speaker": "narrator",
+      "text": "A busca devolve um prefixo interno de Aurora e um ramal que não existe no mural. Alguém da casa. Ou alguém que finge ser.",
+      "location": "loc_quarto",
+      "next": "EP01_SC07_N020"
+    },
+    {
+      "id": "EP01_SC07_N020",
+      "speaker": "narrator",
+      "text": "Antes de dormir, {name} escolhe quem segura o outro lado do fio amanhã. Não é romance. É investigação. As rotas continuam abertas.",
+      "location": "loc_quarto",
+      "choices": [
+        {
+          "id": "EP01_SC07_C04",
+          "text": "Pedir ajuda a Theo.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_ally_theo", "value": true },
+            { "type": "trust", "who": "theo", "delta": 8 },
+            { "type": "affinity", "who": "theo", "delta": 4 }
+          ],
+          "next": "EP01_SC07_N030"
+        },
+        {
+          "id": "EP01_SC07_C05",
+          "text": "Pedir ajuda a Gael.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_ally_gael", "value": true },
+            { "type": "trust", "who": "gael", "delta": 8 },
+            { "type": "affinity", "who": "gael", "delta": 4 }
+          ],
+          "next": "EP01_SC07_N030"
+        },
+        {
+          "id": "EP01_SC07_C06",
+          "text": "Pedir ajuda a Noah.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_ally_noah", "value": true },
+            { "type": "trust", "who": "noah", "delta": 8 },
+            { "type": "affinity", "who": "noah", "delta": 4 }
+          ],
+          "next": "EP01_SC07_N030"
+        },
+        {
+          "id": "EP01_SC07_C07",
+          "text": "Pedir ajuda a Luna.",
+          "effects": [
+            { "type": "flag", "flag": "ep01_ally_luna", "value": true },
+            { "type": "trust", "who": "luna", "delta": 8 },
+            { "type": "affinity", "who": "luna", "delta": 4 }
+          ],
+          "next": "EP01_SC07_N030"
+        }
+      ]
+    },
+    {
+      "id": "EP01_SC07_N030",
+      "speaker": "narrator",
+      "text": "Resumo: o campus ganhou nomes. Uma foto ganhou um colar. A coragem pesa o que {name} ousou. Amanhã o pátio vai parecer menor. Fim do episódio 1.",
+      "location": "loc_quarto",
+      "tags": ["recap", "episode_end"],
+      "next": null
+    }
+  ]
+}

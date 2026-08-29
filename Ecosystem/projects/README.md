@@ -21,6 +21,7 @@ Cada entrada resume escopo, maturidade, stack e aponta para docs locais e specs 
 | PRJ-09 | MutterCoin Solana | `Blockchain/MutterCoinSolana` | [09-muttercoin-solana.md](09-muttercoin-solana.md) |
 | PRJ-10 | Observabilidade local | `infra` | [10-infra.md](10-infra.md) |
 | PRJ-11 | Web legada (referência) | `muttergames-web` | [11-muttergames-web-legacy.md](11-muttergames-web-legacy.md) |
+| PRJ-12 | Conexões do Destino | `game-narrativo` | [12-conexoes-do-destino.md](12-conexoes-do-destino.md) |
 
 ## Fora do catálogo de produto
 
@@ -38,7 +39,7 @@ Cada entrada resume escopo, maturidade, stack e aponta para docs locais e specs 
 MVP / vertical slice:  Fallen Tactics, Taskbar Planets, Web, API, Launcher, Fallen GS
 Protótipo jogável:     Beat Up (sem loop de entregas ainda)
 Sandbox:               MutterCoin Solana
-Conceito:              Forge of Champions
+Conceito:              Forge of Champions, Conexões do Destino
 Legado / referência:   muttergames-web, FT 4.3
 ```
 

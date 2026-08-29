@@ -1,0 +1,325 @@
+{
+  "version": 1,
+  "max_per_visit": 1,
+  "denylist_flag_prefixes": [
+    "ep01_crit_",
+    "ep02_crit_",
+    "ep03_crit_",
+    "ending_",
+    "route_lock_"
+  ],
+  "denylist_flags": ["ep01_viu_foto_iris", "ep01_ally_theo", "ep01_ally_gael", "ep01_ally_noah", "ep01_ally_luna", "ep01_ally_bia"],
+  "denylist_evidence": ["ev_colar_iris", "ev_iris_foto_recente", "ev_nexo_predicao", "ev_bolsa_inconsistente", "ev_msg_ameaca"],
+  "events": [
+    {
+      "id": "evt_gatos_patio",
+      "pool": "flavor",
+      "locations": ["loc_patio"],
+      "episodes": [1, 2, 3],
+      "weight": 8,
+      "nodes": [
+        { "id": "evt_gatos_patio_N001", "speaker": "narrator", "text": "Três gatos ocupam o muro da reitoria como se pagassem aluguel. Um deles olha para {name} e decide que não vale a pena." }
+      ]
+    },
+    {
+      "id": "evt_chuva_cafe",
+      "pool": "flavor",
+      "locations": ["loc_cafe"],
+      "episodes": [1, 2, 3],
+      "weight": 6,
+      "nodes": [
+        { "id": "evt_chuva_cafe_N001", "speaker": "marta", "expression": "idle", "text": "Janela é para quem ainda não se molhou. Senta." }
+      ]
+    },
+    {
+      "id": "evt_cartaz_iris",
+      "pool": "clue_echo",
+      "locations": ["loc_patio", "loc_biblioteca"],
+      "episodes": [1, 2, 3],
+      "weight": 3,
+      "once": true,
+      "nodes": [
+        { "id": "evt_cartaz_iris_N001", "speaker": "narrator", "text": "Um cartaz desbotado: DESAPARECIDA. O nome quase sumiu. {name} não precisa ler para reconhecer o recorte da foto — mas o papel não entrega nada que o corredor ainda não vá entregar." }
+      ]
+    },
+    {
+      "id": "evt_theo_hum",
+      "pool": "social",
+      "locations": ["loc_ensaio", "loc_patio"],
+      "episodes": [1, 2, 3],
+      "weight": 5,
+      "choices": true,
+      "nodes": [
+        {
+          "id": "evt_theo_hum_N001",
+          "speaker": "theo",
+          "expression": "idle",
+          "text": "Não é um show. É… desafinar até achar o meio.",
+          "choices": [
+            { "id": "evt_theo_hum_C01", "text": "Parar e ouvir.", "effects": [{ "type": "affinity", "who": "theo", "delta": 2 }], "next": null },
+            { "id": "evt_theo_hum_C02", "text": "Passar sem atrapalhar.", "effects": [], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_gael_fila",
+      "pool": "social",
+      "locations": ["loc_secretaria", "loc_biblioteca"],
+      "episodes": [1, 2, 3],
+      "weight": 4,
+      "nodes": [
+        {
+          "id": "evt_gael_fila_N001",
+          "speaker": "gael",
+          "expression": "serious",
+          "text": "A fila não morde. Só demora. Se quiser, eu abro uma exceção. Se não quiser, eu respeito mais.",
+          "choices": [
+            { "id": "evt_gael_fila_C01", "text": "Ajudar a organizar.", "effects": [{ "type": "affinity", "who": "gael", "delta": 2 }], "next": null },
+            { "id": "evt_gael_fila_C02", "text": "Ir embora.", "effects": [], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_noah_cafeina",
+      "pool": "social",
+      "locations": ["loc_cafe", "loc_lab_nexo"],
+      "episodes": [1, 2, 3],
+      "weight": 4,
+      "nodes": [
+        {
+          "id": "evt_noah_cafeina_N001",
+          "speaker": "noah",
+          "expression": "idle",
+          "text": "Se eu pousar o notebook e ele desaparecer, o semestre acaba. Pode… ficar dois minutos aqui? Sem ler a tela.",
+          "choices": [
+            { "id": "evt_noah_cafeina_C01", "text": "Guardar sem olhar.", "effects": [{ "type": "trust", "who": "noah", "delta": 3 }], "next": null },
+            { "id": "evt_noah_cafeina_C02", "text": "Recusar com educação.", "effects": [], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_luna_lente",
+      "pool": "social",
+      "locations": ["loc_corredor_old", "loc_lab_foto"],
+      "episodes": [1, 2, 3],
+      "weight": 4,
+      "nodes": [
+        {
+          "id": "evt_luna_lente_N001",
+          "speaker": "luna",
+          "expression": "idle",
+          "text": "Não se mexa. Um segundo. …Tá. Pode se mexer. E pode dizer não da próxima vez, eu mereço.",
+          "choices": [
+            { "id": "evt_luna_lente_C01", "text": "Cobrar o clique.", "effects": [{ "type": "trust", "who": "luna", "delta": 2 }], "next": null },
+            { "id": "evt_luna_lente_C02", "text": "Deixar passar.", "effects": [{ "type": "affinity", "who": "luna", "delta": 1 }], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_bia_snack",
+      "pool": "social",
+      "locations": ["loc_dorm_bia", "loc_quarto"],
+      "episodes": [1, 2, 3],
+      "weight": 6,
+      "conditions": [{ "type": "flag", "flag": "ep01_confided_bia", "value": true }],
+      "nodes": [
+        { "id": "evt_bia_snack_N001", "speaker": "bia", "expression": "smile", "text": "Não é veneno. É pão. Você sumiu da cara e eu fiquei com medo de ter só a cama da janela de novo." }
+      ],
+      "effects": [{ "type": "affinity", "who": "bia", "delta": 1 }]
+    },
+    {
+      "id": "evt_fio_azul_casal",
+      "pool": "thread",
+      "locations": ["loc_patio"],
+      "episodes": [1, 2, 3],
+      "weight": 3,
+      "conditions": [{ "type": "flag", "flag": "ep01_saw_red_thread", "value": true }],
+      "nodes": [
+        { "id": "evt_fio_azul_casal_N001", "speaker": "narrator", "text": "Dois desconhecidos riem. Entre eles, um fio azul pulsa, grosso demais para o que parece só amizade de fila. Proteção. Ou dependência. {name} desvia o olhar." }
+      ]
+    },
+    {
+      "id": "evt_fio_cinza_helena",
+      "pool": "thread",
+      "locations": ["loc_secretaria"],
+      "episodes": [2, 3],
+      "weight": 2,
+      "nodes": [
+        { "id": "evt_fio_cinza_helena_N001", "speaker": "narrator", "text": "Helena fala baixo com um professor. O fio entre os dois é cinza, opaco. Segredo. {name} não ganha nome, papel nem arquivo — só a certeza de que Aurora também tece para dentro." }
+      ]
+    },
+    {
+      "id": "evt_caio_gravador",
+      "pool": "social",
+      "locations": ["loc_cafe", "loc_patio"],
+      "episodes": [1, 2, 3],
+      "weight": 3,
+      "nodes": [
+        {
+          "id": "evt_caio_gravador_N001",
+          "speaker": "caio",
+          "expression": "idle",
+          "text": "Relaxa: o vermelhinho está desligado. Ou estava. Você prefere off the record ou off the campus?",
+          "choices": [
+            { "id": "evt_caio_gravador_C01", "text": "Desviar.", "effects": [], "next": null },
+            { "id": "evt_caio_gravador_C02", "text": "Perguntar o que ele quer.", "effects": [{ "type": "affinity", "who": "caio", "delta": 1 }], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_marta_lenda",
+      "pool": "flavor",
+      "locations": ["loc_cafe"],
+      "episodes": [1, 2, 3],
+      "weight": 4,
+      "once": true,
+      "nodes": [
+        { "id": "evt_marta_lenda_N001", "speaker": "marta", "expression": "serious", "text": "Tecelã que corta o próprio fio acha que se livra. A gente que fica é que vê o nó." }
+      ]
+    },
+    {
+      "id": "evt_msg_bia",
+      "pool": "phone",
+      "locations": ["loc_quarto"],
+      "episodes": [1, 2, 3],
+      "weight": 5,
+      "nodes": [
+        {
+          "id": "evt_msg_bia_N001",
+          "speaker": "bia",
+          "text": "[figurinha de pão] se você estiver viva, responde com um emoji. se não estiver, também responde. eu aceito fantasma.",
+          "choices": [
+            { "id": "evt_msg_bia_C01", "text": "Responder.", "effects": [{ "type": "affinity", "who": "bia", "delta": 1 }], "next": null },
+            { "id": "evt_msg_bia_C02", "text": "Deixar para depois.", "effects": [], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_roupa_festa",
+      "pool": "wardrobe",
+      "locations": ["loc_patio"],
+      "episodes": [1, 2, 3],
+      "weight": 3,
+      "conditions": [{ "type": "wardrobe_tag_in", "tags": ["bold", "formal"] }],
+      "nodes": [
+        { "id": "evt_roupa_festa_N001", "speaker": "narrator", "text": "Alguém na escadaria assobia baixo para o conjunto de {name}. Não é pista. É campus." }
+      ]
+    },
+    {
+      "id": "evt_dante_aviso",
+      "pool": "flavor",
+      "locations": ["loc_biblioteca"],
+      "episodes": [2, 3],
+      "weight": 3,
+      "nodes": [
+        { "id": "evt_dante_aviso_N001", "speaker": "dante", "expression": "serious", "text": "Folclore costeiro, terceira estante. Não é recomendação de vida. É contexto. E não cite o meu nome no pedido." }
+      ]
+    },
+    {
+      "id": "evt_wifi_nexo",
+      "pool": "clue_echo",
+      "locations": ["loc_lab_nexo", "loc_biblioteca"],
+      "episodes": [3],
+      "weight": 2,
+      "nodes": [
+        { "id": "evt_wifi_nexo_N001", "speaker": "narrator", "text": "Uma tela pede login no Nexo. Sem dados. Sem previsão. Só o logo — dois pontos tentando se encontrar e falhando com elegância." }
+      ]
+    },
+    {
+      "id": "evt_mar_terminal",
+      "pool": "flavor",
+      "locations": ["loc_terminal"],
+      "episodes": [1],
+      "weight": 5,
+      "nodes": [
+        { "id": "evt_mar_terminal_N001", "speaker": "narrator", "text": "Maresia na boca. O ônibus já foi. Miralume não vai pedir desculpa." }
+      ]
+    },
+    {
+      "id": "evt_ensaio_porta",
+      "pool": "social",
+      "locations": ["loc_ensaio"],
+      "episodes": [1, 2, 3],
+      "weight": 3,
+      "conditions": [{ "type": "flag", "flag": "ep01_festa_theo", "value": true }],
+      "nodes": [
+        {
+          "id": "evt_ensaio_porta_N001",
+          "speaker": "narrator",
+          "text": "A porta do ensaio está entreaberta. Theo não viu {name}.",
+          "choices": [
+            { "id": "evt_ensaio_porta_C01", "text": "Bater antes de entrar.", "effects": [{ "type": "trust", "who": "theo", "delta": 2 }], "next": null },
+            { "id": "evt_ensaio_porta_C02", "text": "Escutar um pouco.", "effects": [{ "type": "affinity", "who": "theo", "delta": 1 }], "next": null }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "evt_biblioteca_silencio",
+      "pool": "flavor",
+      "locations": ["loc_biblioteca"],
+      "episodes": [2, 3],
+      "weight": 7,
+      "nodes": [
+        { "id": "evt_biblioteca_silencio_N001", "speaker": "narrator", "text": "Alguém ri. Alguém xinga em sussurro. A Aurora também tem bronca de biblioteca." }
+      ]
+    },
+    {
+      "id": "evt_lanterna_quebrada",
+      "pool": "flavor",
+      "locations": ["loc_corredor_old"],
+      "episodes": [1, 2],
+      "weight": 4,
+      "nodes": [
+        { "id": "evt_lanterna_quebrada_N001", "speaker": "narrator", "text": "A lâmpada pisca como se lembrasse de outra pessoa. Não há objeto no chão. Só o reflexo de {name}." }
+      ]
+    },
+    {
+      "id": "evt_fio_dourado_eco",
+      "pool": "thread",
+      "locations": ["loc_corredor_old"],
+      "episodes": [3],
+      "weight": 1,
+      "once": true,
+      "effects": [{ "type": "flag", "flag": "saw_gold_echo", "value": true }],
+      "nodes": [
+        { "id": "evt_fio_dourado_eco_N001", "speaker": "narrator", "text": "No vidro de uma porta trancada, um eco dourado — fino demais para tocar. Propósito. Ou vontade de ter um." }
+      ]
+    },
+    {
+      "id": "evt_helena_discurso",
+      "pool": "flavor",
+      "locations": ["loc_patio"],
+      "episodes": [2, 3],
+      "weight": 2,
+      "nodes": [
+        { "id": "evt_helena_discurso_N001", "speaker": "helena", "expression": "idle", "text": "Aurora protege os seus. Contem com isso — e correspondam." }
+      ]
+    },
+    {
+      "id": "evt_caio_rival",
+      "pool": "social",
+      "locations": ["loc_patio"],
+      "episodes": [2, 3],
+      "weight": 3,
+      "nodes": [
+        {
+          "id": "evt_caio_rival_N001",
+          "speaker": "caio",
+          "expression": "serious",
+          "text": "Seu aliado mente bem. Ou acredita na própria ata. Os dois dão manchete.",
+          "choices": [
+            { "id": "evt_caio_rival_C01", "text": "Concordar sem prova.", "effects": [{ "type": "trust", "who": "ally", "delta": -1 }, { "type": "affinity", "who": "caio", "delta": 2 }], "next": null },
+            { "id": "evt_caio_rival_C02", "text": "Recusar fofoca.", "effects": [{ "type": "trust", "who": "ally", "delta": 1 }], "next": null }
+          ]
+        }
+      ]
+    }
+  ]
+}

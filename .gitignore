@@ -11,7 +11,7 @@ target/
 .env.local
 .env.*.local
 !.env.example
-data/
+/data/
 
 # Tool and language caches
 .godot/

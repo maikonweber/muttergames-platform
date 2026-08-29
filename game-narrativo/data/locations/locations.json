@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "hub": "loc_patio",
+  "locations": [
+    {
+      "id": "loc_terminal",
+      "name": "Terminal de Miralume",
+      "bg": "bg_terminal_dusk",
+      "tags": ["arrival", "sea", "public"],
+      "episodes": [1],
+      "ambience": "amb_sea",
+      "story_locked_in": ["EP01_SC01"]
+    },
+    {
+      "id": "loc_patio",
+      "name": "Pátio Aurora",
+      "bg": "bg_patio_day",
+      "tags": ["campus", "day", "hub"],
+      "episodes": [1, 2, 3],
+      "ambience": "amb_campus"
+    },
+    {
+      "id": "loc_secretaria",
+      "name": "Secretaria",
+      "bg": "bg_secretaria_day",
+      "tags": ["admin", "indoor"],
+      "episodes": [1],
+      "story_locked_in": ["EP01_SC03"]
+    },
+    {
+      "id": "loc_dorm_bia",
+      "name": "Dormitório (Bia)",
+      "bg": "bg_dorm_bia",
+      "tags": ["private", "safe"],
+      "episodes": [1, 2, 3]
+    },
+    {
+      "id": "loc_festa",
+      "name": "Festa de recepção",
+      "bg": "bg_festa_night",
+      "tags": ["night", "social", "once"],
+      "episodes": [1],
+      "ambience": "amb_party",
+      "story_locked_in": ["EP01_SC05"]
+    },
+    {
+      "id": "loc_corredor_old",
+      "name": "Corredor antigo",
+      "bg": "bg_corredor_old",
+      "tags": ["mystery", "indoor"],
+      "episodes": [1, 2],
+      "story_locked_in": ["EP01_SC06"]
+    },
+    {
+      "id": "loc_quarto",
+      "name": "Quarto da protagonista",
+      "bg": "bg_quarto_night",
+      "tags": ["private", "phone", "hub"],
+      "episodes": [1, 2, 3],
+      "story_locked_in": ["EP01_SC07"]
+    },
+    {
+      "id": "loc_lab_foto",
+      "name": "Laboratório fotográfico",
+      "bg": "bg_lab_foto",
+      "tags": ["mystery", "hidden"],
+      "episodes": [2]
+    },
+    {
+      "id": "loc_cafe",
+      "name": "Café Farol",
+      "bg": "bg_cafe_farol",
+      "tags": ["town", "social", "lore"],
+      "episodes": [1, 2, 3]
+    },
+    {
+      "id": "loc_lab_nexo",
+      "name": "Laboratório de Noah",
+      "bg": "bg_lab_nexo",
+      "tags": ["tech", "restricted"],
+      "episodes": [3]
+    },
+    {
+      "id": "loc_biblioteca",
+      "name": "Biblioteca Aurora",
+      "bg": "bg_biblioteca",
+      "tags": ["campus", "quiet"],
+      "episodes": [2, 3]
+    },
+    {
+      "id": "loc_ensaio",
+      "name": "Sala de ensaio",
+      "bg": "bg_ensaio",
+      "tags": ["music", "private"],
+      "episodes": [1, 2, 3]
+    }
+  ]
+}

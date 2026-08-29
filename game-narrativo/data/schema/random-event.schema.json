@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://muttergames.local/conexoes/random-event.schema.json",
+  "title": "RandomEvent",
+  "type": "object",
+  "required": ["id", "pool", "locations", "weight", "nodes"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^evt_" },
+    "pool": {
+      "type": "string",
+      "enum": ["flavor", "social", "thread", "clue_echo", "phone", "wardrobe"]
+    },
+    "locations": { "type": "array", "items": { "type": "string" } },
+    "episodes": { "type": "array", "items": { "type": "integer" } },
+    "weight": { "type": "integer", "minimum": 1 },
+    "once": { "type": "boolean" },
+    "cooldown_days": { "type": "integer", "minimum": 0 },
+    "conditions": { "type": "array" },
+    "effects": { "type": "array" },
+    "nodes": {
+      "type": "array",
+      "description": "Mini-grafo local; IDs evt_*_N00X, não EP."
+    }
+  }
+}
