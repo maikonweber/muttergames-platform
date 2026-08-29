@@ -33,7 +33,6 @@ window/size/viewport_height=1280
 window/size/window_width_override=450
 window/size/window_height_override=800
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 window/handheld/orientation=1
 
 [input]
@@ -62,4 +61,3 @@ pointing/emulate_touch_from_mouse=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/canvas_textures/default_texture_filter=1

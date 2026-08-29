@@ -15,10 +15,15 @@ target/
 
 # Tool and language caches
 .godot/
+.godot-appdata/
 .import/
+.android-sdk/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+
+# Packaged Android builds (source stays in repo)
+lira_studio/builds/
 
 # Godot export / packaged builds (keep source only)
 *.zip
