@@ -63,12 +63,51 @@ def validate_episode(path: Path) -> None:
         if len(choices) > 4:
             fail(f"{nid} tem {len(choices)} escolhas")
         targets = [c["next"] for c in choices] if choices else [node.get("next")]
+        if node.get("skip"):
+            targets.append(node["skip"])
         for nxt in targets:
             if nxt and nxt not in nodes:
                 fail(f"{nid} next órfão {nxt}")
         if not node.get("text"):
             fail(f"{nid} sem texto")
+    check_reachable(data, nodes)
+    check_portraits(data)
     print(f"OK {path.name}: {len(nodes)} nós")
+
+
+def check_reachable(data: dict, nodes: dict) -> None:
+    """Todo nó tem de ser alcançável a partir do start, senão é texto morto."""
+    pending = [data["start"]]
+    seen = set()
+    while pending:
+        nid = pending.pop()
+        if nid in seen or nid not in nodes:
+            continue
+        seen.add(nid)
+        node = nodes[nid]
+        for choice in node.get("choices") or []:
+            pending.append(choice["next"])
+        for key in ("next", "skip"):
+            if node.get(key):
+                pending.append(node[key])
+    orphans = sorted(set(nodes) - seen)
+    if orphans:
+        fail(f"nós inalcançáveis: {', '.join(orphans)}")
+
+
+def check_portraits(data: dict) -> None:
+    """Plano de testes: todo speaker tem retrato para a expressão pedida."""
+    art = ROOT.parent / "conexoes" / "assets" / "portraits"
+    missing = set()
+    for node in data["nodes"]:
+        speaker = node["speaker"]
+        if speaker in ("narrator", "festa", "ally"):
+            continue
+        expression = node.get("expression", "idle")
+        if not (art / speaker / f"{speaker}_{expression}.png").exists():
+            missing.add(f"{speaker}_{expression}")
+    if missing:
+        fail(f"retratos ausentes: {', '.join(sorted(missing))}")
 
 
 def validate_events(path: Path) -> None:

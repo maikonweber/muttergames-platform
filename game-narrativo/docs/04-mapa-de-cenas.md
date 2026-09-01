@@ -22,7 +22,9 @@ Estrutura de diamante: variações locais convergem em marcos. Nenhuma rota do M
 Roteiro jogável: [`../narrativa/roteiro-ep01.md`](../narrativa/roteiro-ep01.md). Nós: [`../data/episodes/ep01/nodes.json`](../data/episodes/ep01/nodes.json).
 
 ```text
-SC01 Terminal ── decisão: como reagir à nova vida
+SC00 Abertura fria ── a ameaça primeiro; corta para doze horas antes
+        │
+SC01 Terminal ── decisão: como reagir à nova vida  (cartaz de Íris)
         │
 SC02 Pátio ──── decisão: ajudar / confrontar / brincar  (primeiro fio)
         │
@@ -43,7 +45,8 @@ SC07 Quarto ── responder / bloquear / investigar o número
 
 | Cena | ID prefixo | Local | Acontecimento | Decisão | Tipo |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `EP01_SC01` | Terminal | Chegada, mensagem da mãe, mar | Postura inicial | personalidade |
+| 0 | `EP01_SC00` | Quarto | Abertura fria: a mensagem de ameaça | — | gancho |
+| 1 | `EP01_SC01` | Terminal | Chegada, mãe na caixa postal, cartaz de Íris | Postura inicial | personalidade |
 | 2 | `EP01_SC02` | Pátio | Esbarra no primeiro personagem; fio vermelho | Ajudar, confrontar, brincar | relacional + fios |
 | 3 | `EP01_SC03` | Secretaria | Bolsa inconsistente no sobrenome da mãe | Questionar ou observar | investigativa |
 | 4 | `EP01_SC04` | Dormitório | Bia; visual para a festa | Estilo e confidente | expressão + relacional |

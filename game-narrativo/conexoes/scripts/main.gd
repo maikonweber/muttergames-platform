@@ -20,11 +20,18 @@ const DISPLAY_NAMES := {
 	"noah": "Noah",
 	"luna": "Luna",
 }
+const FESTA_CAST := ["theo", "gael", "noah", "luna"]
+const ALLY_CAST := ["theo", "gael", "noah", "luna", "bia"]
 
 var nodes := {}
+var start_node := "EP01_SC01_N001"
 var current_node: Dictionary = {}
 var flags := {}
+var affinity := {}
+var trust := {}
+var courage := 0
 var player_name := "Lia"
+var last_location := ""
 var background: TextureRect
 var portrait: TextureRect
 var dimmer: ColorRect
@@ -38,7 +45,7 @@ var cg_layer: Control
 func _ready() -> void:
 	build_view()
 	load_episode()
-	show_node("EP01_SC01_N001")
+	show_node(start_node)
 
 func build_view() -> void:
 	background = TextureRect.new()
@@ -48,17 +55,25 @@ func build_view() -> void:
 	add_child(background)
 
 	dimmer = ColorRect.new()
-	dimmer.color = Color(0.025, 0.015, 0.08, 0.35)
+	dimmer.color = Color(0.025, 0.015, 0.08, 0.22)
 	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dimmer)
 
+	# Janela de busto à direita, acima da caixa. Os sprites são corpo inteiro;
+	# o recorte fica em apply_portrait_texture().
 	portrait = TextureRect.new()
-	portrait.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	portrait.position = Vector2(700, 60)
-	portrait.size = Vector2(520, 620)
+	portrait.anchor_left = 1.0
+	portrait.anchor_top = 0.0
+	portrait.anchor_right = 1.0
+	portrait.anchor_bottom = 1.0
+	portrait.offset_left = -470
+	portrait.offset_top = 8
+	portrait.offset_right = -6
+	portrait.offset_bottom = -230
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.z_index = 1
 	add_child(portrait)
 
 	dialogue = PanelContainer.new()
@@ -67,6 +82,7 @@ func build_view() -> void:
 	dialogue.offset_top = -252
 	dialogue.offset_right = -38
 	dialogue.offset_bottom = -28
+	dialogue.z_index = 2
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color("161127e8")
 	panel_style.border_color = Color("b067cf")
@@ -92,7 +108,8 @@ func build_view() -> void:
 	text_label = RichTextLabel.new()
 	text_label.bbcode_enabled = true
 	text_label.fit_content = true
-	text_label.custom_minimum_size = Vector2(0, 80)
+	text_label.custom_minimum_size = Vector2(0, 96)
+	text_label.scroll_active = false
 	text_label.add_theme_font_size_override("normal_font_size", 21)
 	text_label.add_theme_color_override("default_color", Color("f7f2ff"))
 	content.add_child(text_label)
@@ -108,6 +125,7 @@ func build_view() -> void:
 	cg_layer = Control.new()
 	cg_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	cg_layer.visible = false
+	cg_layer.z_index = 10
 	add_child(cg_layer)
 
 func load_episode() -> void:
@@ -121,22 +139,29 @@ func load_episode() -> void:
 		return
 	for node in parsed.get("nodes", []):
 		nodes[node.id] = node
+	var declared: String = parsed.get("start", "")
+	if nodes.has(declared):
+		start_node = declared
 
 func show_node(node_id: String) -> void:
 	if not nodes.has(node_id):
 		show_end()
 		return
 	current_node = nodes[node_id]
+	var guard := 0
 	while not conditions_met(current_node.get("conditions", [])):
-		var skipped_next = current_node.get("next", "")
-		if skipped_next == "" or not nodes.has(skipped_next):
+		guard += 1
+		var skipped_next = current_node.get("skip", current_node.get("next", ""))
+		if skipped_next == null or skipped_next == "" or not nodes.has(skipped_next) or guard > 24:
 			show_end()
 			return
 		current_node = nodes[skipped_next]
 	apply_effects(current_node.get("effects", []))
-	set_background(current_node.get("location", ""))
-	set_portrait(current_node.get("speaker", "narrator"), current_node.get("expression", "idle"))
-	speaker_label.text = DISPLAY_NAMES.get(current_node.get("speaker", ""), "")
+	var location: String = current_node.get("location", "")
+	var speaker := resolve_speaker(current_node.get("speaker", "narrator"))
+	set_background(location)
+	set_portrait(speaker, current_node.get("expression", "idle"), location, current_node.get("tags", []))
+	speaker_label.text = DISPLAY_NAMES.get(speaker, "")
 	text_label.text = current_node.get("text", "").replace("{name}", player_name)
 	clear_choices()
 	var choices: Array = current_node.get("choices", [])
@@ -152,14 +177,56 @@ func set_background(location: String) -> void:
 	var path: String = BACKGROUNDS.get(location, "")
 	background.texture = load(path) if path != "" else null
 
-func set_portrait(speaker: String, expression: String) -> void:
+func set_portrait(speaker: String, expression: String, location: String, tags: Array) -> void:
+	var scene_changed := location != "" and location != last_location
+	if location != "":
+		last_location = location
+	var force_clear := tags.has("clear_portrait") or scene_changed and (speaker == "narrator" or speaker == "")
 	if speaker == "narrator" or speaker == "":
-		portrait.texture = null
+		if force_clear:
+			portrait.texture = null
+			portrait.modulate = Color.WHITE
+		else:
+			portrait.modulate = Color(0.58, 0.54, 0.68, 1.0)
 		return
+	portrait.modulate = Color.WHITE
 	var path := "res://assets/portraits/%s/%s_%s.png" % [speaker, speaker, expression]
 	if not ResourceLoader.exists(path):
 		path = "res://assets/portraits/%s/%s_idle.png" % [speaker, speaker]
-	portrait.texture = load(path) if ResourceLoader.exists(path) else null
+	if ResourceLoader.exists(path):
+		apply_portrait_texture(load(path))
+	else:
+		portrait.texture = null
+		push_warning("Retrato ausente para %s (%s)" % [speaker, expression])
+
+func apply_portrait_texture(tex: Texture2D) -> void:
+	if tex == null:
+		portrait.texture = null
+		return
+	var size := tex.get_size()
+	var atlas := AtlasTexture.new()
+	atlas.atlas = tex
+	atlas.region = Rect2(0, 0, size.x, size.y * 0.58)
+	atlas.filter_clip = true
+	portrait.texture = atlas
+
+func resolve_speaker(speaker: String) -> String:
+	if speaker == "festa":
+		return flagged_member(FESTA_CAST, "ep01_festa_")
+	if speaker == "ally":
+		return flagged_member(ALLY_CAST, "ep01_ally_")
+	return speaker
+
+func resolve_who(who: String) -> String:
+	if who == "festa" or who == "ally":
+		return resolve_speaker(who)
+	return who
+
+func flagged_member(cast: Array, prefix: String) -> String:
+	for who in cast:
+		if flags.get("%s%s" % [prefix, who], false):
+			return who
+	return "narrator"
 
 func add_choice(choice: Dictionary) -> void:
 	var button := Button.new()
@@ -190,20 +257,41 @@ func conditions_met(conditions: Array) -> bool:
 func apply_effects(effects: Array) -> void:
 	for effect in effects:
 		match effect.get("type", ""):
-			"flag": flags[effect.get("flag", "")] = effect.get("value", true)
-			"cg": show_cg(effect.get("id", ""))
+			"flag":
+				flags[effect.get("flag", "")] = effect.get("value", true)
+			"cg":
+				show_cg(effect.get("id", ""))
+			"wardrobe_tag":
+				var tag: String = str(effect.get("tag", ""))
+				if tag != "":
+					flags["ep01_wardrobe_%s" % tag] = true
+			"affinity":
+				var who := resolve_who(str(effect.get("who", "")))
+				affinity[who] = int(affinity.get(who, 0)) + int(effect.get("delta", 0))
+			"trust":
+				var who := resolve_who(str(effect.get("who", "")))
+				trust[who] = int(trust.get(who, 0)) + int(effect.get("delta", 0))
+			"courage":
+				courage += int(effect.get("delta", 0))
+			"evidence":
+				flags[str(effect.get("id", ""))] = true
+			"profile":
+				var stat: String = str(effect.get("stat", ""))
+				if stat != "":
+					flags["profile_%s" % stat] = int(flags.get("profile_%s" % stat, 0)) + int(effect.get("delta", 0))
 
 func show_cg(cg_id: String) -> void:
 	var path := "res://assets/cg/%s.png" % cg_id
 	if cg_id == "cg_ep01_festa_rota":
-		for who in ["theo", "gael", "noah", "luna"]:
+		for who in FESTA_CAST:
 			if flags.get("ep01_festa_%s" % who, false):
 				path = "res://assets/cg/cg_ep01_festa_rota_%s.png" % who
 				break
 	if not ResourceLoader.exists(path):
 		return
 	cg_layer.visible = true
-	for child in cg_layer.get_children(): child.queue_free()
+	for child in cg_layer.get_children():
+		child.queue_free()
 	var image := TextureRect.new()
 	image.texture = load(path)
 	image.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -212,9 +300,14 @@ func show_cg(cg_id: String) -> void:
 	cg_layer.add_child(image)
 	var close := Button.new()
 	close.text = "Continuar"
-	close.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	close.position = Vector2(-170, -75)
-	close.size = Vector2(130, 42)
+	close.anchor_left = 1.0
+	close.anchor_top = 1.0
+	close.anchor_right = 1.0
+	close.anchor_bottom = 1.0
+	close.offset_left = -170
+	close.offset_top = -75
+	close.offset_right = -40
+	close.offset_bottom = -33
 	close.pressed.connect(func() -> void: cg_layer.visible = false)
 	cg_layer.add_child(close)
 

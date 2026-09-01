@@ -34,6 +34,7 @@
     },
     "effects": { "type": "array" },
     "next": { "type": ["string", "null"] },
+    "skip": { "type": ["string", "null"], "description": "Se conditions falharem, ir para este nó em vez de next. Variantes exclusivas após um diamante." },
     "tags": { "type": "array", "items": { "type": "string" } }
   }
 }
