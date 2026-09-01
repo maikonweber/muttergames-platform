@@ -32,7 +32,13 @@ var _pack_btn: Button
 var _tool_box: GridContainer
 var _pack_sheet: Control
 var _tools_toggle: Button
+var _tray: VBoxContainer
 var _tools_open := true
+
+const HANDLE_H := 64.0
+const DOCK_H := 252.0
+const TRAY_H := 286.0
+const LIPSTICK_ICON := "res://assets/ui/cosmetic_tools/tool_lipstick_card_v1.png"
 
 const PINK := Color(0.95, 0.42, 0.62)
 const CREAM := Color(1.0, 0.96, 0.93)
@@ -102,7 +108,7 @@ func setup(
 	InventoryService.coins_changed.connect(func(_total: int) -> void: _refresh_coins())
 	resized.connect(_apply_safe_area)
 	_refresh()
-	set_tools_open(false)
+	set_tools_open(true)
 
 
 func _build() -> void:
@@ -138,20 +144,21 @@ func _build() -> void:
 	bottom_box.add_theme_constant_override("separation", 8)
 	_bottom.add_child(bottom_box)
 
-	_tool_box = GridContainer.new()
-	_tool_box.columns = 4
-	_tool_box.add_theme_constant_override("h_separation", 8)
-	_tool_box.add_theme_constant_override("v_separation", 8)
-	bottom_box.add_child(_tool_box)
-	_fill_tools()
+	_tools_toggle = _paint_handle()
+	_tools_toggle.pressed.connect(func() -> void: set_tools_open(not _tools_open))
+	bottom_box.add_child(_tools_toggle)
+
+	_tray = VBoxContainer.new()
+	_tray.add_theme_constant_override("separation", 8)
+	bottom_box.add_child(_tray)
 
 	_color_row = HBoxContainer.new()
 	_color_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_color_row.add_theme_constant_override("separation", 8)
-	bottom_box.add_child(_color_row)
+	_tray.add_child(_color_row)
 
-	_intensity = _slider_row(bottom_box, "Intensidade")
-	_size = _slider_row(bottom_box, "Tamanho")
+	_intensity = _slider_row(_tray, "Mais cor")
+	_size = _slider_row(_tray, "Mais grosso")
 	_intensity.min_value = 0.05
 	_intensity.max_value = 1.0
 	_intensity.step = 0.05
@@ -164,7 +171,7 @@ func _build() -> void:
 	var actions := HBoxContainer.new()
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
 	actions.add_theme_constant_override("separation", 10)
-	bottom_box.add_child(actions)
+	_tray.add_child(actions)
 	_undo_btn = _icon_action(actions, "res://assets/ui/action_controls/action_undo_card_v1.png", "Desfazer", func() -> void: undo_requested.emit())
 	_redo_btn = _icon_action(actions, "res://assets/ui/action_controls/action_redo_card_v1.png", "Refazer", func() -> void: redo_requested.emit())
 	_before_btn = _icon_action(actions, "res://assets/ui/action_controls/action_compare_card_v1.png", "Antes e depois", func() -> void: GameState.toggle_before_after())
@@ -179,17 +186,15 @@ func _build() -> void:
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.add_theme_color_override("font_color", INK)
-	_status.add_theme_font_size_override("font_size", 15)
-	bottom_box.add_child(_status)
-	_tools_toggle = Button.new()
-	_tools_toggle.custom_minimum_size = Vector2(250, 44)
-	_tools_toggle.pressed.connect(func() -> void: set_tools_open(not _tools_open))
-	_round_card(_tools_toggle, false)
-	_tools_toggle.add_theme_color_override("font_color", INK)
-	_tools_toggle.add_theme_font_size_override("font_size", 16)
-	_tools_toggle.z_index = 4
-	add_child(_tools_toggle)
-	_position_tools_toggle()
+	_status.add_theme_font_size_override("font_size", 16)
+	_tray.add_child(_status)
+
+	_tool_box = GridContainer.new()
+	_tool_box.columns = 4
+	_tool_box.add_theme_constant_override("h_separation", 10)
+	_tool_box.add_theme_constant_override("v_separation", 10)
+	bottom_box.add_child(_tool_box)
+	_fill_tools()
 
 
 func _panel(is_top: bool) -> PanelContainer:
@@ -204,7 +209,7 @@ func _panel(is_top: bool) -> PanelContainer:
 		panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 		panel.anchor_top = 1.0
 		panel.anchor_bottom = 1.0
-		panel.offset_top = -572
+		panel.offset_top = -(HANDLE_H + DOCK_H + TRAY_H)
 		panel.offset_bottom = 0
 	var style := StyleBoxFlat.new()
 	style.bg_color = PANEL
@@ -227,24 +232,59 @@ func _panel(is_top: bool) -> PanelContainer:
 func set_tools_open(open: bool) -> void:
 	_tools_open = open
 	if _bottom:
-		_bottom.visible = open
+		_bottom.visible = true
+	if _tray:
+		_tray.visible = open
 	if _tools_toggle:
-		_tools_toggle.text = "Ocultar ferramentas" if open else "Ferramentas"
-	_position_tools_toggle()
+		_tools_toggle.text = "Ver o rostinho" if open else "Pintar!"
+	_style_paint_handle(open)
+	_apply_safe_area()
 
 
-func _position_tools_toggle() -> void:
+func _paint_handle() -> Button:
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, HANDLE_H)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.icon = load(LIPSTICK_ICON) as Texture2D
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", 56)
+	button.add_theme_constant_override("h_separation", 14)
+	button.text = "Pintar!"
+	button.add_theme_font_size_override("font_size", 26)
+	button.add_theme_color_override("font_color", Color.WHITE)
+	button.add_theme_color_override("font_hover_color", Color.WHITE)
+	button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	var style := StyleBoxFlat.new()
+	style.bg_color = PINK
+	style.set_corner_radius_all(22)
+	style.set_border_width_all(4)
+	style.border_color = GOLD
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_stylebox_override("hover", style)
+	button.add_theme_stylebox_override("pressed", style)
+	return button
+
+
+func _style_paint_handle(open: bool) -> void:
 	if _tools_toggle == null:
 		return
-	_tools_toggle.anchor_left = 0.5
-	_tools_toggle.anchor_right = 0.5
-	_tools_toggle.anchor_top = 1.0
-	_tools_toggle.anchor_bottom = 1.0
-	_tools_toggle.offset_left = -125
-	_tools_toggle.offset_right = 125
-	var top := -620.0 if _tools_open else -54.0
-	_tools_toggle.offset_top = top
-	_tools_toggle.offset_bottom = top + 44.0
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.86, 0.32, 0.54) if open else PINK
+	style.set_corner_radius_all(22)
+	style.set_border_width_all(4)
+	style.border_color = GOLD
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	_tools_toggle.add_theme_stylebox_override("normal", style)
+	_tools_toggle.add_theme_stylebox_override("hover", style)
+	_tools_toggle.add_theme_stylebox_override("pressed", style)
+	_tools_toggle.add_theme_color_override("font_color", Color.WHITE)
 
 
 func _fill_models() -> void:
@@ -277,9 +317,13 @@ func _fill_tools() -> void:
 		child.queue_free()
 	for tool_id in ToolController.TOOLS:
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(0, 132)
+		button.custom_minimum_size = Vector2(0, 118)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.pressed.connect(func() -> void: tools.select_tool(tool_id))
+		button.pressed.connect(func() -> void:
+			tools.select_tool(tool_id)
+			if not _tools_open:
+				set_tools_open(true)
+		)
 		button.set_meta("tool_id", tool_id)
 		button.tooltip_text = TOOL_LABELS.get(tool_id, tool_id)
 		_round_card(button, false)
@@ -293,7 +337,7 @@ func _fill_tools() -> void:
 		col.add_theme_constant_override("separation", 2)
 		var icon := TextureRect.new()
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		icon.custom_minimum_size = Vector2(0, 90)
+		icon.custom_minimum_size = Vector2(0, 78)
 		icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -303,7 +347,7 @@ func _fill_tools() -> void:
 		lab.text = TOOL_LABELS.get(tool_id, tool_id)
 		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lab.add_theme_color_override("font_color", INK)
-		lab.add_theme_font_size_override("font_size", 16)
+		lab.add_theme_font_size_override("font_size", 18)
 		col.add_child(lab)
 		button.add_child(col)
 		_tool_box.add_child(button)
@@ -465,7 +509,7 @@ func _slider_row(parent: Control, caption: String) -> HSlider:
 	label.add_theme_color_override("font_color", INK)
 	var slider := HSlider.new()
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	slider.custom_minimum_size = Vector2(0, 28)
+	slider.custom_minimum_size = Vector2(0, 40)
 	row.add_child(label)
 	row.add_child(slider)
 	parent.add_child(row)
@@ -474,7 +518,7 @@ func _slider_row(parent: Control, caption: String) -> HSlider:
 
 func _icon_action(parent: Control, path: String, tip: String, callback: Callable) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(64, 64)
+	button.custom_minimum_size = Vector2(72, 72)
 	button.tooltip_text = tip
 	button.pressed.connect(callback)
 	_round_card(button, false)
@@ -496,11 +540,11 @@ func _icon_action(parent: Control, path: String, tip: String, callback: Callable
 func _pill_button(caption: String, callback: Callable) -> Button:
 	var button := Button.new()
 	button.text = caption
-	button.custom_minimum_size = Vector2(88, 48)
+	button.custom_minimum_size = Vector2(100, 56)
 	button.pressed.connect(callback)
 	_round_card(button, false)
 	button.add_theme_color_override("font_color", INK)
-	button.add_theme_font_size_override("font_size", 14)
+	button.add_theme_font_size_override("font_size", 16)
 	return button
 
 
@@ -690,7 +734,8 @@ func _apply_safe_area() -> void:
 		_bottom.offset_left = margins.x
 		_bottom.offset_right = -margins.z
 		_bottom.offset_bottom = -margins.w
-		_bottom.offset_top = -530.0 - margins.w
+		var tray := TRAY_H if _tools_open else 0.0
+		_bottom.offset_top = -(HANDLE_H + DOCK_H + tray) - margins.w
 
 
 func _safe_margins() -> Vector4:
