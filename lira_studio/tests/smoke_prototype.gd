@@ -118,15 +118,19 @@ func _initialize() -> void:
 	if free_doll == null or free_doll.extra_pack:
 		push_error("smoke: boneca free ficou atrás do pacote")
 		failures += 1
-	if entitlements.owns_extra_pack() or entitlements.can_use_cosmetic(coral):
-		push_error("smoke: pacote extra veio liberado sem compra")
-		failures += 1
-	if not entitlements.can_use_cosmetic(ruby) or not entitlements.can_use_model(free_doll):
-		push_error("smoke: conteúdo free ficou bloqueado")
-		failures += 1
-	entitlements.grant(ExtraPack.SKU)
-	if not entitlements.can_use_cosmetic(coral) or not entitlements.can_use_model(extra_doll):
-		push_error("smoke: compra do pacote não liberou extra")
+	if ExtraPack.PURCHASES_ENABLED:
+		if entitlements.owns_extra_pack() or entitlements.can_use_cosmetic(coral):
+			push_error("smoke: pacote extra veio liberado sem compra")
+			failures += 1
+		if not entitlements.can_use_cosmetic(ruby) or not entitlements.can_use_model(free_doll):
+			push_error("smoke: conteúdo free ficou bloqueado")
+			failures += 1
+		entitlements.grant(ExtraPack.SKU)
+		if not entitlements.can_use_cosmetic(coral) or not entitlements.can_use_model(extra_doll):
+			push_error("smoke: compra do pacote não liberou extra")
+			failures += 1
+	elif not entitlements.can_use_cosmetic(coral) or not entitlements.can_use_model(extra_doll):
+		push_error("smoke: conteúdo extra deveria estar livre com compras desligadas")
 		failures += 1
 	var earring = library.get_accessory("pearl_drop_earrings")
 	if earring == null:

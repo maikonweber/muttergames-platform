@@ -7,7 +7,8 @@ var _adapter: RefCounted
 
 func _ready() -> void:
 	_adapter = _pick_adapter()
-	restore()
+	if ExtraPack.PURCHASES_ENABLED:
+		restore()
 
 
 func _pick_adapter() -> RefCounted:
@@ -21,6 +22,9 @@ func is_play_store() -> bool:
 
 
 func purchase_extra_pack() -> void:
+	if not ExtraPack.PURCHASES_ENABLED:
+		purchase_finished.emit(false, ExtraPack.SKU, "")
+		return
 	if InventoryService.owns_extra_pack():
 		purchase_finished.emit(true, ExtraPack.SKU, "Pacote já desbloqueado")
 		return

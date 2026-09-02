@@ -14,6 +14,7 @@ var _last_lash_id: String = ""
 var _last_lash_key: String = ""
 var _lash_apply_queued := false
 var _pending_model_id: String = ""
+var _pending_ad_action: String = ""
 
 
 func _ready() -> void:
@@ -102,15 +103,34 @@ func _on_model_selected(model_id: String) -> void:
 	var model := ContentLibrary.get_model(model_id)
 	if model:
 		session.prefetch_model(model)
-	if AdService.show_on_face_change():
-		if not AdService.interstitial_finished.is_connected(_on_face_ad_finished):
-			AdService.interstitial_finished.connect(_on_face_ad_finished, CONNECT_ONE_SHOT)
+	_run_after_ad("model")
+
+
+func _run_after_ad(action: String) -> void:
+	if AdService.is_showing() and not _pending_ad_action.is_empty():
 		return
-	_apply_pending_model()
+	_pending_ad_action = action
+	if AdService.show_interstitial():
+		if not AdService.interstitial_finished.is_connected(_on_ad_finished):
+			AdService.interstitial_finished.connect(_on_ad_finished, CONNECT_ONE_SHOT)
+		return
+	_apply_pending_ad_action()
 
 
-func _on_face_ad_finished() -> void:
-	_apply_pending_model()
+func _on_ad_finished() -> void:
+	_apply_pending_ad_action()
+
+
+func _apply_pending_ad_action() -> void:
+	var action := _pending_ad_action
+	_pending_ad_action = ""
+	match action:
+		"model":
+			_apply_pending_model()
+		"look":
+			_apply_look()
+		"clear":
+			_apply_clear()
 
 
 func _apply_pending_model() -> void:
@@ -127,12 +147,20 @@ func _on_background_cycled() -> void:
 
 
 func _on_look() -> void:
+	_run_after_ad("look")
+
+
+func _apply_look() -> void:
 	history.push_snapshot(session.snapshot())
 	session.apply_pilot_look()
 	GameState.set_before_after(false)
 
 
 func _on_clear() -> void:
+	_run_after_ad("clear")
+
+
+func _apply_clear() -> void:
 	var category := tools.paint_category()
 	if category.is_empty():
 		return

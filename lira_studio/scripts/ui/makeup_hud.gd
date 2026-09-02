@@ -177,11 +177,12 @@ func _build() -> void:
 	_undo_btn = _icon_action(actions, "res://assets/ui/action_controls/action_undo_card_v1.png", "Desfazer", func() -> void: undo_requested.emit())
 	_redo_btn = _icon_action(actions, "res://assets/ui/action_controls/action_redo_card_v1.png", "Refazer", func() -> void: redo_requested.emit())
 	_before_btn = _icon_action(actions, "res://assets/ui/action_controls/action_compare_card_v1.png", "Antes e depois", func() -> void: GameState.toggle_before_after())
-	actions.add_child(_pill_button("Limpar", func() -> void: clear_requested.emit()))
-	actions.add_child(_pill_button("Surpresa", func() -> void: look_requested.emit()))
+	actions.add_child(_pill_button("Limpar", func() -> void: _emit_if_idle(clear_requested)))
+	actions.add_child(_pill_button("Surpresa", func() -> void: _emit_if_idle(look_requested)))
 	actions.add_child(_pill_button("Fundo", func() -> void: background_cycled.emit()))
-	_pack_btn = _pill_button("Pacote %s" % ExtraPack.PRICE_LABEL, _offer_extra_pack)
-	actions.add_child(_pack_btn)
+	if ExtraPack.PURCHASES_ENABLED:
+		_pack_btn = _pill_button("Pacote %s" % ExtraPack.PRICE_LABEL, _offer_extra_pack)
+		actions.add_child(_pack_btn)
 	_complete_btn = _icon_action(actions, "res://assets/ui/action_controls/action_confirm_card_v1.png", "Pronto!", func() -> void: complete_requested.emit())
 
 	_status = Label.new()
@@ -308,7 +309,7 @@ func _fill_models() -> void:
 		thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		thumb.texture = ContentLibrary.get_model_thumb(model_id)
 		button.add_child(thumb)
-		if not InventoryService.can_use_model_id(model_id):
+		if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_model_id(model_id):
 			_lock_overlay(button)
 		_model_row.add_child(button)
 
@@ -377,7 +378,7 @@ func _fill_colors() -> void:
 			button.custom_minimum_size = Vector2(64, 64)
 			button.tooltip_text = item.display_name
 			button.pressed.connect(func() -> void:
-				if not InventoryService.can_use_accessory(item):
+				if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_accessory(item):
 					_offer_extra_pack()
 					return
 				if history:
@@ -398,7 +399,7 @@ func _fill_colors() -> void:
 				thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				thumb.texture = item.texture
 				button.add_child(thumb)
-			if not InventoryService.can_use_accessory(item):
+			if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_accessory(item):
 				_lock_overlay(button)
 			grid.add_child(button)
 		return
@@ -429,7 +430,7 @@ func _cosmetic_button(item: CosmeticData) -> Button:
 	button.custom_minimum_size = Vector2(56, 56)
 	button.tooltip_text = item.display_name
 	button.pressed.connect(func() -> void:
-		if not InventoryService.can_use_cosmetic(item):
+		if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_cosmetic(item):
 			_offer_extra_pack()
 			return
 		tools.select_cosmetic(item)
@@ -457,7 +458,7 @@ func _cosmetic_button(item: CosmeticData) -> Button:
 		button.add_theme_stylebox_override("normal", style)
 		button.add_theme_stylebox_override("hover", style)
 		button.add_theme_stylebox_override("pressed", style)
-	if not InventoryService.can_use_cosmetic(item):
+	if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_cosmetic(item):
 		_lock_overlay(button)
 	return button
 
@@ -468,7 +469,7 @@ func _tint_button(swatch: Dictionary) -> Button:
 	button.custom_minimum_size = Vector2(40, 40)
 	button.tooltip_text = String(swatch.get("display_name", ""))
 	button.pressed.connect(func() -> void:
-		if not InventoryService.can_use_tint(swatch):
+		if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_tint(swatch):
 			_offer_extra_pack()
 			return
 		tools.select_tint(color)
@@ -482,7 +483,7 @@ func _tint_button(swatch: Dictionary) -> Button:
 	button.add_theme_stylebox_override("normal", style)
 	button.add_theme_stylebox_override("hover", style)
 	button.add_theme_stylebox_override("pressed", style)
-	if not InventoryService.can_use_tint(swatch):
+	if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_tint(swatch):
 		_lock_overlay(button)
 	return button
 
@@ -583,7 +584,7 @@ func _lock_overlay(button: Button) -> void:
 
 
 func _offer_extra_pack() -> void:
-	if InventoryService.owns_extra_pack():
+	if not ExtraPack.PURCHASES_ENABLED or InventoryService.owns_extra_pack():
 		return
 	if _pack_sheet and is_instance_valid(_pack_sheet):
 		return
@@ -645,12 +646,18 @@ func _close_pack_sheet() -> void:
 	_pack_sheet = null
 
 
+func _emit_if_idle(sig: Signal) -> void:
+	if AdService.is_showing():
+		return
+	sig.emit()
+
+
 func _on_model_pressed(model_id: String) -> void:
 	if AdService.is_showing():
 		return
 	if model_id == GameState.selected_model_id:
 		return
-	if not InventoryService.can_use_model_id(model_id):
+	if ExtraPack.PURCHASES_ENABLED and not InventoryService.can_use_model_id(model_id):
 		_offer_extra_pack()
 		return
 	GameState.select_model(model_id)
@@ -726,7 +733,7 @@ func _refresh() -> void:
 	_refresh_coins()
 	_highlight_models()
 	if _pack_btn:
-		_pack_btn.visible = not InventoryService.owns_extra_pack()
+		_pack_btn.visible = ExtraPack.PURCHASES_ENABLED and not InventoryService.owns_extra_pack()
 	if _complete_btn:
 		_complete_btn.visible = not GameState.is_free_play()
 

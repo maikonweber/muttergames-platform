@@ -26,6 +26,8 @@ func owns_extra_pack() -> bool:
 
 
 func can_use_flag(requires_pack: bool) -> bool:
+	if not ExtraPack.PURCHASES_ENABLED:
+		return true
 	return (not requires_pack) or owns_extra_pack()
 
 
