@@ -5,7 +5,7 @@ signal before_after_changed(active: bool)
 signal debug_masks_changed(active: bool)
 signal play_mode_changed(mode: String)
 
-var selected_model_id: String = "model_01"
+var selected_model_id: String = "model_02"
 var background_index: int = 0
 var before_after: bool = false
 var debug_masks: bool = false

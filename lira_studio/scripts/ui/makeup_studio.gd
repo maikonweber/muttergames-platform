@@ -35,7 +35,7 @@ func _ready() -> void:
 	result_screen.play_again.connect(_on_play_again)
 	tools.changed.connect(_on_tool_changed)
 	StoreService.purchase_finished.connect(_on_purchase_finished)
-	_load_model(GameState.selected_model_id)
+	_load_model(_startup_model_id())
 	_apply_background()
 	_show_brief()
 
@@ -70,6 +70,14 @@ func _start_free_play() -> void:
 	_apply_background()
 	_load_model(GameState.selected_model_id)
 	hud.set_challenge(null)
+
+
+func _startup_model_id() -> String:
+	var saved := String(SaveService.data.get("last_model_id", "model_02"))
+	if ContentLibrary.get_model(saved) == null:
+		saved = "model_02"
+	GameState.select_model(saved)
+	return saved
 
 
 func _load_model(model_id: String) -> void:
@@ -138,6 +146,8 @@ func _apply_pending_model() -> void:
 		return
 	var model_id := _pending_model_id
 	_pending_model_id = ""
+	SaveService.data["last_model_id"] = model_id
+	SaveService.save()
 	_load_model(model_id)
 
 
@@ -161,11 +171,10 @@ func _on_clear() -> void:
 
 
 func _apply_clear() -> void:
-	var category := tools.paint_category()
-	if category.is_empty():
-		return
 	history.push_snapshot(session.snapshot())
-	session.clear_layer(category)
+	session.clear_all()
+	_last_lash_id = ""
+	_last_lash_key = ""
 
 
 func _on_undo() -> void:
@@ -267,7 +276,7 @@ func _show_brief() -> void:
 	title.add_theme_color_override("font_color", Color(0.42, 0.18, 0.30))
 	box.add_child(title)
 	var body := Label.new()
-	body.text = "Toque num cartão. Na festa, pinte lábios e pálpebras. No brincar, pinte o que quiser."
+	body.text = "Toque num cartão. Na festa, pinte lábios e pálpebras. No brincar, escolha o rostinho e pinte o que quiser."
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_theme_font_size_override("font_size", 16)

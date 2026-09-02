@@ -7,8 +7,8 @@ signal interstitial_finished
 const APP_ID_ANDROID := "ca-app-pub-5667103684184988~1277904095"
 const INTERSTITIAL_ANDROID := "ca-app-pub-5667103684184988/3054020193"
 const TEST_INTERSTITIAL_ANDROID := "ca-app-pub-3940256099942544/1033173712"
-const LOAD_WAIT_SEC := 8.0
-const FALLBACK_WAIT_SEC := 2.5
+const LOAD_WAIT_SEC := 3.5
+const FALLBACK_WAIT_SEC := 2.0
 
 var _interstitial: InterstitialAd
 var _loader: InterstitialAdLoader
