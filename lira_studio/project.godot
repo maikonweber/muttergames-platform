@@ -10,7 +10,6 @@ config_version=5
 
 [admob]
 
-general/android/enabled=true
 general/android/app_id="ca-app-pub-5667103684184988~1277904095"
 general/ios/enabled=false
 
@@ -67,6 +66,10 @@ before_after={
 [input_devices]
 
 pointing/emulate_touch_from_mouse=true
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://addons/admob/gdscript/sample/translations/admob_sample.en.translation", "res://addons/admob/gdscript/sample/translations/admob_sample.pt_BR.translation", "res://addons/admob/gdscript/sample/translations/admob_sample.es.translation", "res://addons/admob/gdscript/sample/translations/admob_sample.zh_CN.translation", "res://addons/admob/gdscript/sample/translations/admob_sample.ja.translation")
 
 [rendering]
 
