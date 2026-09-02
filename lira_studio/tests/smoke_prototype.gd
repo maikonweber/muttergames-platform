@@ -45,6 +45,15 @@ func _initialize() -> void:
 			if skin.get_pixel(512, 700).a < 0.8 or skin.get_pixel(12, 12).a > 0.05 or skin.get_pixel(512, 120).a > 0.05:
 				push_error("smoke: máscara de pele invade cabelo ou cenário em %s" % model_id)
 				failures += 1
+	if library.get_cosmetic("lipstick_coral") == null:
+		push_error("smoke: batom extra não encontrado pelo índice")
+		failures += 1
+	if not library.is_extra_model("model_03") or library.is_extra_model("model_01"):
+		push_error("smoke: marcação extra das bonecas falhou")
+		failures += 1
+	if library.get_model_thumb("model_01") == null:
+		push_error("smoke: miniatura da modelo 01 ausente")
+		failures += 1
 	if library.get_accessories().size() != 12:
 		push_error("smoke: esperava 12 acessórios")
 		failures += 1

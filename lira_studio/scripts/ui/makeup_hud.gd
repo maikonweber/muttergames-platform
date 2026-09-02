@@ -34,6 +34,8 @@ var _pack_sheet: Control
 var _tools_toggle: Button
 var _tray: VBoxContainer
 var _tools_open := true
+var _palette_signature := ""
+var _tool_signature := ""
 
 const HANDLE_H := 64.0
 const DOCK_H := 252.0
@@ -94,20 +96,20 @@ func setup(
 	_build()
 	_apply_safe_area()
 	if tools:
-		tools.changed.connect(_refresh)
+		tools.changed.connect(_on_tools_changed)
 	if session:
-		session.accessories_changed.connect(_refresh)
+		session.accessories_changed.connect(_on_accessories_changed)
 	if history:
 		history.changed.connect(_refresh_history)
 	InventoryService.pack_changed.connect(func(_owned: bool) -> void:
 		_fill_models()
-		_refresh()
+		refresh()
 	)
-	GameState.before_after_changed.connect(func(_a: bool) -> void: _refresh())
-	GameState.play_mode_changed.connect(func(_mode: String) -> void: _refresh())
+	GameState.before_after_changed.connect(func(_a: bool) -> void: refresh())
+	GameState.play_mode_changed.connect(func(_mode: String) -> void: refresh())
 	InventoryService.coins_changed.connect(func(_total: int) -> void: _refresh_coins())
 	resized.connect(_apply_safe_area)
-	_refresh()
+	refresh()
 	set_tools_open(true)
 
 
@@ -291,7 +293,6 @@ func _fill_models() -> void:
 	for child in _model_row.get_children():
 		child.queue_free()
 	for model_id in ContentLibrary.model_ids():
-		var model := ContentLibrary.get_model(model_id)
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(68, 68)
 		button.pressed.connect(_on_model_pressed.bind(model_id))
@@ -305,9 +306,9 @@ func _fill_models() -> void:
 		thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		thumb.texture = model.thumb if model else null
+		thumb.texture = ContentLibrary.get_model_thumb(model_id)
 		button.add_child(thumb)
-		if model and not InventoryService.can_use_model(model):
+		if not InventoryService.can_use_model_id(model_id):
 			_lock_overlay(button)
 		_model_row.add_child(button)
 
@@ -645,22 +646,66 @@ func _close_pack_sheet() -> void:
 
 
 func _on_model_pressed(model_id: String) -> void:
-	var model := ContentLibrary.get_model(model_id)
-	if model and not InventoryService.can_use_model(model):
+	if AdService.is_showing():
+		return
+	if model_id == GameState.selected_model_id:
+		return
+	if not InventoryService.can_use_model_id(model_id):
 		_offer_extra_pack()
 		return
 	GameState.select_model(model_id)
+	_highlight_models()
 	model_selected.emit(model_id)
 
 
-func _refresh() -> void:
+func refresh() -> void:
+	_refresh()
+
+
+func _on_tools_changed() -> void:
 	if tools == null:
+		return
+	var tool_sig := "%s|%s" % [tools.category, tools.erase]
+	var palette_sig := _palette_key()
+	if tool_sig == _tool_signature and palette_sig == _palette_signature:
+		_sync_sliders()
+		return
+	_refresh()
+
+
+func _on_accessories_changed() -> void:
+	if tools and tools.is_accessory_tool():
+		_palette_signature = ""
+	_refresh()
+
+
+func _palette_key() -> String:
+	if tools == null:
+		return ""
+	var worn := ""
+	if tools.is_accessory_tool() and session:
+		worn = str(session.equipped)
+	return "%s|%s|%s|%s|%s" % [tools.category, tools.cosmetic_id, tools.color_override, tools.erase, worn]
+
+
+func _restyle_tools() -> void:
+	if _tool_box == null or tools == null:
 		return
 	for child in _tool_box.get_children():
 		if child is Button:
 			var tool_id := String(child.get_meta("tool_id", ""))
 			_round_card(child, tool_id == tools.category)
-	_fill_colors()
+
+
+func _refresh() -> void:
+	if tools == null:
+		return
+	_tool_signature = "%s|%s" % [tools.category, tools.erase]
+	_restyle_tools()
+	var palette_sig := _palette_key()
+	if palette_sig != _palette_signature:
+		_palette_signature = palette_sig
+		_fill_colors()
 	_sync_sliders()
 	_round_card(_before_btn, GameState.before_after)
 	var cosmetic := tools.current_cosmetic()

@@ -53,9 +53,15 @@ const _BACKGROUND_PATHS: Array[String] = [
 ]
 
 var _models: Dictionary = {}
+var _model_ids: Array[String] = []
+var _thumbs: Dictionary = {}
+var _backgrounds: Dictionary = {}
 var _cosmetics: Array[CosmeticData] = []
+var _cosmetic_by_id: Dictionary = {}
+var _cosmetics_by_category: Dictionary = {}
 var _challenges: Dictionary = {}
 var _accessories: Array[AccessoryData] = []
+var _accessory_by_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -65,18 +71,52 @@ func _ready() -> void:
 func _ensure_catalog() -> void:
 	if _cosmetics.is_empty():
 		_cosmetics = _build_cosmetics()
+		_index_cosmetics()
 	if _challenges.is_empty():
 		_challenges = _build_challenges()
 	if _accessories.is_empty():
 		_accessories = _build_accessories()
+		_index_accessories()
+	if _model_ids.is_empty():
+		for key in _MODEL_DEFS.keys():
+			_model_ids.append(String(key))
+		_model_ids.sort()
+
+
+func _index_cosmetics() -> void:
+	_cosmetic_by_id.clear()
+	_cosmetics_by_category.clear()
+	for item in _cosmetics:
+		_cosmetic_by_id[item.id] = item
+		if not _cosmetics_by_category.has(item.category):
+			var grouped: Array[CosmeticData] = []
+			_cosmetics_by_category[item.category] = grouped
+		(_cosmetics_by_category[item.category] as Array).append(item)
+
+
+func _index_accessories() -> void:
+	_accessory_by_id.clear()
+	for item in _accessories:
+		_accessory_by_id[item.id] = item
 
 
 func model_ids() -> Array[String]:
-	var ids: Array[String] = []
-	for key in _MODEL_DEFS.keys():
-		ids.append(String(key))
-	ids.sort()
-	return ids
+	_ensure_catalog()
+	return _model_ids
+
+
+func is_extra_model(model_id: String) -> bool:
+	return bool(_MODEL_DEFS.get(model_id, {}).get("extra_pack", false))
+
+
+func get_model_thumb(model_id: String) -> Texture2D:
+	if _thumbs.has(model_id):
+		return _thumbs[model_id]
+	if not _MODEL_DEFS.has(model_id):
+		return null
+	var thumb := _tex("%s/thumbnails/%s_thumb_v2.png" % [model_id, model_id])
+	_thumbs[model_id] = thumb
+	return thumb
 
 
 func get_model(model_id: String) -> ModelData:
@@ -90,18 +130,14 @@ func get_model(model_id: String) -> ModelData:
 
 func get_cosmetic(cosmetic_id: String) -> CosmeticData:
 	_ensure_catalog()
-	for item in _cosmetics:
-		if item.id == cosmetic_id:
-			return item
-	return null
+	return _cosmetic_by_id.get(cosmetic_id, null) as CosmeticData
 
 
 func get_cosmetics(category: String) -> Array[CosmeticData]:
 	_ensure_catalog()
+	var cached: Array = _cosmetics_by_category.get(category, [])
 	var out: Array[CosmeticData] = []
-	for item in _cosmetics:
-		if item.category == category:
-			out.append(item)
+	out.assign(cached)
 	return out
 
 
@@ -137,7 +173,11 @@ func get_background(index: int) -> Texture2D:
 	if _BACKGROUND_PATHS.is_empty():
 		return null
 	var wrapped := posmod(index, _BACKGROUND_PATHS.size())
-	return load(_BACKGROUND_PATHS[wrapped]) as Texture2D
+	if _backgrounds.has(wrapped):
+		return _backgrounds[wrapped]
+	var texture := load(_BACKGROUND_PATHS[wrapped]) as Texture2D
+	_backgrounds[wrapped] = texture
+	return texture
 
 
 func _make_model(model_id: String) -> ModelData:
@@ -149,13 +189,12 @@ func _make_model(model_id: String) -> ModelData:
 	# Todos os retratos e perfis usam a mesma revisao: v2 remove franja
 	# cromatica das bordas e impede que a miniatura fique defasada da modelo.
 	var face_version := "%s_face_base_v2.png" % model_id
-	var thumb_version := "%s_thumb_v2.png" % model_id
 	data.face_base = _tex("%s/base/%s" % [model_id, face_version])
 	# A base do rosto já contém o cabelo final. As camadas técnicas atuais não
 	# respeitam a mesma composição e ficavam sobre o rosto no runtime.
 	data.hair_back = null
 	data.hair_front = null
-	data.thumb = _tex("%s/thumbnails/%s" % [model_id, thumb_version])
+	data.thumb = get_model_thumb(model_id)
 	data.smile = _tex("%s/expressions/%s_expression_smile_v1.png" % [model_id, model_id])
 	data.mask_skin = _tex("%s/masks/%s_skin_mask.png" % [model_id, model_id])
 	data.mask_lips = _tex("%s/masks/%s_lips_mask.png" % [model_id, model_id])
@@ -306,10 +345,7 @@ func get_accessories() -> Array[AccessoryData]:
 
 func get_accessory(accessory_id: String) -> AccessoryData:
 	_ensure_catalog()
-	for item in _accessories:
-		if item.id == accessory_id:
-			return item
-	return null
+	return _accessory_by_id.get(accessory_id, null) as AccessoryData
 
 
 func _build_accessories() -> Array[AccessoryData]:

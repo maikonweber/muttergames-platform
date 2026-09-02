@@ -11,6 +11,9 @@ var tools: ToolController
 var challenges: ChallengeService
 var _brief: Control
 var _last_lash_id: String = ""
+var _last_lash_key: String = ""
+var _lash_apply_queued := false
+var _pending_model_id: String = ""
 
 
 func _ready() -> void:
@@ -85,7 +88,7 @@ func _on_extra_pack_confirmed() -> void:
 
 func _on_purchase_finished(ok: bool, _sku: String, message: String) -> void:
 	if ok:
-		hud._refresh()
+		hud.refresh()
 	if hud._status:
 		hud._status.text = message
 
@@ -95,6 +98,26 @@ func _apply_background() -> void:
 
 
 func _on_model_selected(model_id: String) -> void:
+	_pending_model_id = model_id
+	var model := ContentLibrary.get_model(model_id)
+	if model:
+		session.prefetch_model(model)
+	if AdService.show_on_face_change():
+		if not AdService.interstitial_finished.is_connected(_on_face_ad_finished):
+			AdService.interstitial_finished.connect(_on_face_ad_finished, CONNECT_ONE_SHOT)
+		return
+	_apply_pending_model()
+
+
+func _on_face_ad_finished() -> void:
+	_apply_pending_model()
+
+
+func _apply_pending_model() -> void:
+	if _pending_model_id.is_empty():
+		return
+	var model_id := _pending_model_id
+	_pending_model_id = ""
 	_load_model(model_id)
 
 
@@ -127,17 +150,10 @@ func _on_redo() -> void:
 
 func _on_tool_changed() -> void:
 	if tools.is_sprite_tool():
-		var lashes := tools.current_cosmetic()
-		if lashes == null:
-			return
-		if not InventoryService.can_use_cosmetic(lashes):
-			return
-		if _last_lash_id != lashes.id:
-			history.push_snapshot(session.snapshot())
-			_last_lash_id = lashes.id
-		session.apply_lashes(lashes, tools.brush_radius, tools.current_color(), tools.intensity)
+		_queue_lash_apply()
 		return
 	_last_lash_id = ""
+	_last_lash_key = ""
 	if not tools.is_fill_tool():
 		return
 	var cosmetic := tools.current_cosmetic()
@@ -145,6 +161,30 @@ func _on_tool_changed() -> void:
 		return
 	history.push_snapshot(session.snapshot())
 	session.apply_mask_fill(cosmetic.category, cosmetic.color, tools.intensity, cosmetic.dilate_px)
+
+
+func _queue_lash_apply() -> void:
+	if _lash_apply_queued:
+		return
+	_lash_apply_queued = true
+	call_deferred("_flush_lash_apply")
+
+
+func _flush_lash_apply() -> void:
+	_lash_apply_queued = false
+	if tools == null or not tools.is_sprite_tool():
+		return
+	var lashes := tools.current_cosmetic()
+	if lashes == null or not InventoryService.can_use_cosmetic(lashes):
+		return
+	var key := "%s|%d|%s|%.2f" % [lashes.id, tools.brush_radius, tools.current_color(), tools.intensity]
+	if key == _last_lash_key:
+		return
+	if _last_lash_id != lashes.id:
+		history.push_snapshot(session.snapshot())
+		_last_lash_id = lashes.id
+	_last_lash_key = key
+	session.apply_lashes(lashes, tools.brush_radius, tools.current_color(), tools.intensity)
 
 
 func _on_complete() -> void:

@@ -20,36 +20,67 @@ var _mask_bbox: Dictionary = {}
 var _face_image: Image
 var _lash_cache: Dictionary = {}
 var _texture_sync_queued: Dictionary = {}
+var _model_runtime: Dictionary = {}
+var _face_alpha: PackedByteArray = PackedByteArray()
+var _face_luma: PackedByteArray = PackedByteArray()
+var _face_w: int = 0
+var _face_h: int = 0
 
 
 func load_model(next_model: ModelData) -> void:
 	model = next_model
-	_layers.clear()
-	_textures.clear()
-	_masks.clear()
-	_mask_bbox.clear()
 	equipped.clear()
 	landmarks.clear()
 	_face_image = null
+	_face_alpha = PackedByteArray()
+	_face_luma = PackedByteArray()
+	_face_w = 0
+	_face_h = 0
+	_texture_sync_queued.clear()
 	if model == null:
+		_layers.clear()
+		_textures.clear()
+		_masks.clear()
+		_mask_bbox.clear()
 		model_changed.emit()
 		layers_changed.emit()
 		accessories_changed.emit()
 		return
-	if model.face_base:
-		_face_image = _as_rgba(model.face_base.get_image())
+	var runtime := _runtime_for(model)
+	_face_image = runtime["face"]
+	_face_alpha = runtime["alpha"]
+	_face_luma = runtime["luma"]
+	_face_w = int(runtime["width"])
+	_face_h = int(runtime["height"])
+	_masks = (runtime["masks"] as Dictionary).duplicate()
+	_mask_bbox = (runtime["bbox"] as Dictionary).duplicate()
+	var reuse := not _layers.is_empty()
 	for category in LAYER_CATEGORIES:
-		var image := Image.create(ModelData.CANVAS_SIZE.x, ModelData.CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
-		image.fill(Color(0, 0, 0, 0))
-		_layers[category] = image
-		_textures[category] = ImageTexture.create_from_image(image)
-		_masks[category] = _load_masks(model.mask_for(category))
-		_mask_bbox[category] = _compute_bbox(_masks[category])
-	head_rect = _mask_bbox.get("foundation", Rect2i(200, 200, 624, 900))
-	_compute_landmarks()
+		if reuse:
+			var image: Image = _layers[category]
+			image.fill(Color(0, 0, 0, 0))
+			_sync_texture(category)
+		else:
+			var image := Image.create(ModelData.CANVAS_SIZE.x, ModelData.CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
+			image.fill(Color(0, 0, 0, 0))
+			_layers[category] = image
+			_textures[category] = ImageTexture.create_from_image(image)
+	if runtime.has("landmarks"):
+		landmarks = (runtime["landmarks"] as Dictionary).duplicate()
+		head_rect = runtime["head_rect"]
+	else:
+		head_rect = _mask_bbox.get("foundation", Rect2i(200, 200, 624, 900))
+		_compute_landmarks()
+		runtime["landmarks"] = landmarks.duplicate()
+		runtime["head_rect"] = head_rect
 	model_changed.emit()
 	layers_changed.emit()
 	accessories_changed.emit()
+
+
+func prefetch_model(next_model: ModelData) -> void:
+	if next_model:
+		_runtime_for(next_model)
 
 
 func layer_texture(category: String) -> Texture2D:
@@ -520,7 +551,11 @@ func stamp(
 
 
 func _character_coverage(x: int, y: int, dilate_px: int = 0) -> float:
-	if _face_image:
+	if not _face_alpha.is_empty() and x >= 0 and y >= 0 and x < _face_w and y < _face_h:
+		var alpha := float(_face_alpha[y * _face_w + x]) / 255.0
+		if alpha > 0.12:
+			return alpha
+	elif _face_image:
 		if x >= 0 and y >= 0 and x < _face_image.get_width() and y < _face_image.get_height():
 			var alpha := _face_image.get_pixel(x, y).a
 			if alpha > 0.12:
@@ -557,6 +592,66 @@ func _queue_texture_sync(category: String) -> void:
 func _flush_texture_sync(category: String) -> void:
 	_texture_sync_queued.erase(category)
 	_sync_texture(category)
+
+
+func _runtime_for(next_model: ModelData) -> Dictionary:
+	if _model_runtime.has(next_model.id):
+		return _model_runtime[next_model.id]
+	var face: Image = null
+	if next_model.face_base:
+		face = _as_rgba(next_model.face_base.get_image())
+	var maps := _build_face_maps(face)
+	var masks := {}
+	var bbox := {}
+	for category in LAYER_CATEGORIES:
+		var loaded := _load_masks(next_model.mask_for(category))
+		masks[category] = loaded
+		bbox[category] = _compute_bbox(loaded)
+	var runtime := {
+		"face": face,
+		"alpha": maps["alpha"],
+		"luma": maps["luma"],
+		"width": maps["width"],
+		"height": maps["height"],
+		"masks": masks,
+		"bbox": bbox,
+	}
+	_model_runtime[next_model.id] = runtime
+	return runtime
+
+
+func _build_face_maps(image: Image) -> Dictionary:
+	var empty := {
+		"alpha": PackedByteArray(),
+		"luma": PackedByteArray(),
+		"width": 0,
+		"height": 0,
+	}
+	if image == null:
+		return empty
+	var width := image.get_width()
+	var height := image.get_height()
+	if image.get_format() != Image.FORMAT_RGBA8:
+		image.convert(Image.FORMAT_RGBA8)
+	var data := image.get_data()
+	var count := width * height
+	var alpha := PackedByteArray()
+	var luma := PackedByteArray()
+	alpha.resize(count)
+	luma.resize(count)
+	for i in count:
+		var offset := i * 4
+		var r := int(data[offset])
+		var g := int(data[offset + 1])
+		var b := int(data[offset + 2])
+		alpha[i] = data[offset + 3]
+		luma[i] = clampi((77 * r + 150 * g + 29 * b) >> 8, 0, 255)
+	return {
+		"alpha": alpha,
+		"luma": luma,
+		"width": width,
+		"height": height,
+	}
 
 
 func _load_masks(textures: Array[Texture2D]) -> Array[Image]:
@@ -714,6 +809,10 @@ func _mask_value(pixel: Color) -> float:
 
 
 func _shaded(color: Color, x: int, y: int) -> Color:
+	if not _face_luma.is_empty() and x >= 0 and y >= 0 and x < _face_w and y < _face_h:
+		var luma := float(_face_luma[y * _face_w + x]) / 255.0
+		var light := clampf(0.38 + luma * 0.85, 0.28, 1.12)
+		return Color(color.r * light, color.g * light, color.b * light, color.a)
 	if _face_image == null:
 		return color
 	if x < 0 or y < 0 or x >= _face_image.get_width() or y >= _face_image.get_height():

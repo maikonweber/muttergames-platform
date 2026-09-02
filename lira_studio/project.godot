@@ -8,6 +8,12 @@
 
 config_version=5
 
+[admob]
+
+general/android/enabled=true
+general/android/app_id="ca-app-pub-5667103684184988~1277904095"
+general/ios/enabled=false
+
 [application]
 
 config/name="Lira Studio"
@@ -25,6 +31,7 @@ SaveService="*res://scripts/save/save_service.gd"
 InventoryService="*res://scripts/save/inventory_service.gd"
 StoreService="*res://scripts/store/store_service.gd"
 SettingsService="*res://scripts/save/settings_service.gd"
+AdService="*res://scripts/ads/ad_service.gd"
 
 [display]
 
@@ -34,6 +41,10 @@ window/size/window_width_override=450
 window/size/window_height_override=800
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/admob/plugin.cfg")
 
 [input]
 
@@ -61,3 +72,4 @@ pointing/emulate_touch_from_mouse=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

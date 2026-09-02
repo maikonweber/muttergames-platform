@@ -57,6 +57,10 @@ func can_use_model(model: ModelData) -> bool:
 	return entitlements.can_use_model(model)
 
 
+func can_use_model_id(model_id: String) -> bool:
+	return entitlements.can_use_flag(ContentLibrary.is_extra_model(model_id))
+
+
 func can_use_accessory(item: AccessoryData) -> bool:
 	return entitlements.can_use_accessory(item)
 

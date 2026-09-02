@@ -68,17 +68,11 @@ func select_tool(tool_id: String) -> void:
 	if items.is_empty():
 		changed.emit()
 		return
-	var keep := false
-	for item in items:
-		if item.id == cosmetic_id:
-			keep = true
-			break
-	if not keep:
+	var current := ContentLibrary.get_cosmetic(cosmetic_id)
+	if current == null or current.category != tool_id:
 		select_cosmetic(items[0])
 		return
-	var current := ContentLibrary.get_cosmetic(cosmetic_id)
-	if current:
-		intensity = current.default_intensity
+	intensity = current.default_intensity
 	changed.emit()
 
 
