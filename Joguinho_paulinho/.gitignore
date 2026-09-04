@@ -1,0 +1,6 @@
+.godot/
+.import/
+*.translation
+_preview/
+_source/
+tools/capture_*.png
